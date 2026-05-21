@@ -1,0 +1,259 @@
+// =============================================
+// SmartLogix — Interfaces TypeScript exactas al backend
+// =============================================
+
+// --- AUTENTICACIÓN ---
+
+export type RolNombre = 'admin' | 'bodeguero' | 'transportista' | 'cliente';
+
+export interface LoginRequest {
+  correo: string;
+  clave: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  tipo: string;
+  userId: string;
+  correo: string;
+  rolNombre: RolNombre;
+}
+
+export interface UsuarioSesion {
+  userId: string;
+  correo: string;
+  rolNombre: RolNombre;
+}
+
+// --- USUARIOS ---
+
+export interface DireccionModel {
+  id?: string;
+  calle?: string;
+  ciudad?: string;
+  region?: string;
+  pais?: string;
+  codigoPostal?: string;
+}
+
+export interface Usuario {
+  id: string;
+  nombre: string;
+  apellido?: string;
+  rut?: string;
+  correo: string;
+  cargo?: string;
+  activo?: boolean;
+  rolId?: string;
+  rolNombre?: string;
+  estadoId?: string;
+  estadoNombre?: string;
+  direccion?: DireccionModel;
+}
+
+export interface UsuarioRequest {
+  nombre: string;
+  apellido?: string;
+  rut?: string;
+  correo: string;
+  clave?: string;
+  cargo?: string;
+  rolId?: string;
+  rolNombre?: string;
+}
+
+// --- ROLES ---
+
+export interface Rol {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
+// --- ESTADOS ---
+
+export interface TipoDeEstado {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
+export interface Estado {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  tipoDeEstado?: TipoDeEstado;
+}
+
+// --- INVENTARIO ---
+
+export interface Bodega {
+  idBodega?: number;
+  nombre: string;
+  direccion?: string;
+  ciudad?: string;
+  pais?: string;
+  capacidadTotal?: number;
+  activa?: boolean;
+  totalPasillos?: number;
+}
+
+export interface BodegaRequest {
+  nombre: string;
+  direccion?: string;
+  ciudad?: string;
+  pais?: string;
+  capacidadTotal?: number;
+  activa?: boolean;
+}
+
+export interface Pasillo {
+  idPasillo?: number;
+  codigo: string;
+  descripcion?: string;
+  numeroOrden?: number;
+  activo?: boolean;
+  idBodega?: number;
+  nombreBodega?: string;
+  totalEstantes?: number;
+}
+
+export interface PasilloRequest {
+  codigo: string;
+  descripcion?: string;
+  numeroOrden?: number;
+  idBodega: number;
+  activo?: boolean;
+}
+
+export interface Estante {
+  idEstante?: number;
+  codigo: string;
+  descripcion?: string;
+  numNiveles?: number;
+  capacidadPorNivel?: number;
+  capacidadTotal?: number;
+  activo?: boolean;
+  idPasillo?: number;
+}
+
+export interface EstanteRequest {
+  codigo: string;
+  descripcion?: string;
+  numNiveles?: number;
+  capacidadPorNivel?: number;
+  idPasillo?: number;
+}
+
+// --- CATEGORÍAS ---
+
+export interface Categoria {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
+// --- PRODUCTOS ---
+
+export interface Producto {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  stock?: number;
+  categoriaId?: string;
+  categoriaNombre?: string;
+  estadoNombre?: string;
+  activo?: boolean;
+  imagenUrl?: string;
+  fechaCreacion?: string;
+  fechaActualizacion?: string;
+}
+
+export interface ProductoRequest {
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  stock: number;
+  categoriaId: string;
+  estadoNombre?: string;
+  imagenUrl?: string;
+}
+
+// --- ÓRDENES ---
+
+export interface OrdenDetalle {
+  productoId: string;
+  cantidad: number;
+  productoNombre?: string;
+  precioUnitario?: number;
+  subtotal?: number;
+}
+
+export interface HistorialEntry {
+  id?: string;
+  estadoId?: string;
+  estadoNombre?: string;
+  fecha?: string;
+  comentario?: string;
+}
+
+export interface Orden {
+  id: number;
+  fechaOrden?: string;
+  direccionId?: string;
+  userId?: string;
+  userNombre?: string;
+  estadoActual?: string;
+  detalles?: OrdenDetalle[];
+  historial?: HistorialEntry[];
+  total?: number;
+}
+
+export interface OrdenRequest {
+  direccionId: string;
+  userNombre?: string;
+  detalles: OrdenDetalle[];
+}
+
+export interface HistorialRequest {
+  estadoId: string;
+  estadoNombre: string;
+  comentario?: string;
+}
+
+// --- DASHBOARD ---
+
+export interface MetricaCard {
+  titulo: string;
+  valor: string | number;
+  subtitulo: string;
+  icono: string;
+  color: string;
+  variacion?: number;
+}
+
+export interface MicroservicioStatus {
+  nombre: string;
+  puerto: number;
+  estado: 'activo' | 'inactivo' | 'degradado';
+  version: string;
+  uptime: string;
+}
+
+export interface ActividadReciente {
+  id: number;
+  descripcion: string;
+  modulo: string;
+  tiempo: string;
+  tipo: 'pedido' | 'inventario' | 'envio' | 'usuario' | 'sistema';
+}
+
+// --- API Response Wrapper ---
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  total?: number;
+  page?: number;
+}

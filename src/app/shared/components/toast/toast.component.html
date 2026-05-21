@@ -1,0 +1,27 @@
+<div class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+  @for (toast of toastService.toasts(); track trackById($index, toast)) {
+    <div [class]="colorClass(toast.tipo)"
+      class="flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg pointer-events-auto animate-fade-in">
+
+      <span class="flex-shrink-0 mt-0.5">
+        <svg class="w-5 h-5" [class]="iconClass(toast.tipo)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="iconPath(toast.tipo)" />
+        </svg>
+      </span>
+
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-gray-800">{{ toast.titulo }}</p>
+        @if (toast.mensaje) {
+          <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ toast.mensaje }}</p>
+        }
+      </div>
+
+      <button (click)="toastService.remove(toast.id)"
+        class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors mt-0.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  }
+</div>

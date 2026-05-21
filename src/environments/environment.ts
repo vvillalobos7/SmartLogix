@@ -1,0 +1,22 @@
+export const environment = {
+  production: false,
+  apiGateway: '',
+  services: {
+    auth:        '/auth',
+    registro:    '/auth/register',
+    recuperar:   '/auth/recuperar-clave',
+    usuarios:    '/api/users',
+    direcciones: '/api/direcciones',
+    roles:       '/api/roles',
+    productos:   '/api/productos',
+    categorias:  '/api/categorias',
+    ordenes:     '/api/ordenes',
+    envios:      '/api/ordenes',
+    estados:     '/api/estados',
+    tiposEstado: '/api/tipos-estado',
+    inventarioBodegas:  '/api/inventario/bodegas',
+    inventarioPasillos: '/api/inventario/pasillos',
+    inventarioEstantes: '/api/inventario/estantes',
+    inventarioEstPasi:  '/api/inventario/est-pasi',
+  },
+};

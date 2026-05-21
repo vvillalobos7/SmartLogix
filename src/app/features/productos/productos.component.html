@@ -1,0 +1,284 @@
+<div class="space-y-4">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-base font-semibold text-gray-800">Catálogo de Productos</h2>
+      <p class="text-xs text-gray-400 mt-0.5">{{ productos.length }} productos en catálogo</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input [(ngModel)]="filtro" type="text" placeholder="Nombre, categoría..."
+          class="pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 w-44"
+          [ngModelOptions]="{standalone: true}">
+      </div>
+      <button (click)="openNew()"
+        class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nuevo Producto
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">Img</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio</th>
+            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (p of productosFiltrados; track p.id) {
+            <tr class="hover:bg-gray-50 transition-colors" [class.opacity-50]="!p.activo">
+
+              <!-- Imagen miniatura -->
+              <td class="px-4 py-3">
+                <div class="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  @if (p.imagenUrl) {
+                    <img [src]="p.imagenUrl" [alt]="p.nombre" class="w-full h-full object-cover">
+                  } @else {
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  }
+                </div>
+              </td>
+
+              <td class="px-4 py-3">
+                <div class="text-xs font-medium text-gray-800 max-w-48 truncate">{{ p.nombre }}</div>
+                <div class="text-xs text-gray-400 max-w-48 truncate">{{ p.descripcion }}</div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{{ p.categoriaNombre }}</span>
+              </td>
+              <td class="px-4 py-3 text-right font-mono text-xs"
+                [class.text-red-600]="(p.stock ?? 0) === 0"
+                [class.text-yellow-600]="(p.stock ?? 0) > 0 && (p.stock ?? 0) < 10"
+                [class.text-gray-700]="(p.stock ?? 0) >= 10">
+                {{ p.stock ?? 0 }}
+              </td>
+              <td class="px-4 py-3 text-right font-mono text-xs font-semibold text-gray-800">{{ formatCurrency(p.precio) }}</td>
+              <td class="px-4 py-3 text-center">
+                @if (p.activo) {
+                  <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activo</span>
+                } @else {
+                  <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactivo</span>
+                }
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <!-- Subir imagen -->
+                  <button (click)="abrirImagenModal(p)" title="Gestionar imagen"
+                    class="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </button>
+                  <button (click)="openEdit(p)" title="Editar"
+                    class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                  </button>
+                  <button (click)="toggleActivo(p)"
+                    class="p-1.5 rounded-lg transition-colors"
+                    [class]="p.activo ? 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50' : 'text-gray-400 hover:text-green-600 hover:bg-green-50'"
+                    [title]="p.activo ? 'Desactivar' : 'Activar'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                    </svg>
+                  </button>
+                  <button (click)="onDelete(p.id)" title="Eliminar"
+                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin resultados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CREAR/EDITAR ===== -->
+@if (showModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
+          <p class="text-xs text-gray-400">Completa los datos del producto</p>
+        </div>
+        <button (click)="closeModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="px-6 py-5 space-y-4">
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
+          <input formControlName="nombre"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
+            placeholder="Nombre completo del producto">
+          @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Nombre requerido.</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+          <textarea formControlName="descripcion" rows="2"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 resize-none"
+            placeholder="Descripción del producto"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Precio *</label>
+            <input formControlName="precio" type="number" min="0"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Stock *</label>
+            <input formControlName="stock" type="number" min="0"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría *</label>
+          <select formControlName="categoriaId"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <option value="">Seleccionar categoría...</option>
+            @for (c of categorias; track c.id) {
+              <option [value]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+          @if (form.get('categoriaId')?.invalid && form.get('categoriaId')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Categoría requerida.</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">URL de imagen</label>
+          <input formControlName="imagenUrl"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
+            placeholder="https://... (opcional, o sube desde la tabla)">
+          @if (form.get('imagenUrl')?.value) {
+            <img [src]="form.get('imagenUrl')?.value" alt="preview"
+              class="mt-2 h-16 w-16 object-cover rounded-lg border border-gray-200">
+          }
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" (click)="closeModal()"
+            class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="form.invalid"
+            class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg transition-colors">
+            {{ editando ? 'Actualizar' : 'Crear Producto' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL IMAGEN ===== -->
+@if (showImagenModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800">Imagen del producto</h3>
+          <p class="text-xs text-gray-400">Sube o reemplaza la imagen del producto</p>
+        </div>
+        <button (click)="cerrarImagenModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-5 space-y-4">
+
+        <!-- Preview -->
+        <div class="flex justify-center">
+          <div class="w-40 h-40 rounded-xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+            @if (imagenPreview) {
+              <img [src]="imagenPreview" alt="preview" class="w-full h-full object-cover">
+            } @else {
+              <div class="text-center">
+                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <p class="text-xs text-gray-400">Sin imagen</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Input archivo -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-2">Seleccionar imagen</label>
+          <input type="file" accept="image/*" (change)="onImagenSeleccionada($event)"
+            class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
+          <p class="text-xs text-gray-400 mt-1">PNG, JPG o WebP · Máx. 5 MB</p>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button type="button" (click)="cerrarImagenModal()"
+            class="flex-1 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button type="button" (click)="subirImagen()" [disabled]="!imagenFile || subiendoImagen"
+            class="flex-1 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-50 rounded-lg transition-colors flex items-center justify-center gap-1">
+            @if (subiendoImagen) {
+              <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              Subiendo...
+            } @else {
+              Subir imagen
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

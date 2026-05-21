@@ -1,0 +1,369 @@
+<div class="space-y-4">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-base font-semibold text-gray-800">Inventario</h2>
+      <p class="text-xs text-gray-400 mt-0.5">Bodegas · Pasillos · Estantes</p>
+    </div>
+    <div class="flex items-center gap-2">
+      @if (activeTab === 'bodegas') {
+        <button (click)="openNewBodega()"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nueva Bodega
+        </button>
+      }
+      @if (activeTab === 'pasillos') {
+        <button (click)="openNewPasillo()"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nuevo Pasillo
+        </button>
+      }
+      @if (activeTab === 'estantes') {
+        <button (click)="openNewEstante()"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nuevo Estante
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
+    <button (click)="activeTab = 'bodegas'"
+      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
+      [class]="activeTab === 'bodegas' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+      Bodegas ({{ bodegas.length }})
+    </button>
+    <button (click)="activeTab = 'pasillos'"
+      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
+      [class]="activeTab === 'pasillos' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+      Pasillos ({{ pasillos.length }})
+    </button>
+    <button (click)="activeTab = 'estantes'"
+      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
+      [class]="activeTab === 'estantes' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+      Estantes ({{ estantes.length }})
+    </button>
+  </div>
+
+  <!-- BODEGAS TABLE -->
+  @if (activeTab === 'bodegas') {
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nombre</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ciudad</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Capacidad</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Pasillos</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (b of bodegas; track b.idBodega) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ b.idBodega }}</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs font-medium text-gray-800">{{ b.nombre }}</div>
+                  <div class="text-xs text-gray-400">{{ b.direccion }}</div>
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-600">{{ b.ciudad }}</td>
+                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ b.capacidadTotal ?? '—' }}</td>
+                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ b.totalPasillos ?? getPasillosDeBodega(b.idBodega!).length }}</td>
+                <td class="px-4 py-3 text-center">
+                  @if (b.activa) {
+                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activa</span>
+                  } @else {
+                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactiva</span>
+                  }
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button (click)="toggleBodega(b)"
+                      class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                      [title]="b.activa ? 'Desactivar' : 'Activar'">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                      </svg>
+                    </button>
+                    <button (click)="deleteBodega(b.idBodega!)"
+                      class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin bodegas registradas.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- PASILLOS TABLE -->
+  @if (activeTab === 'pasillos') {
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Código</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descripción</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Bodega</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Estantes</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (p of pasillos; track p.idPasillo) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ p.idPasillo }}</td>
+                <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-700">{{ p.codigo }}</td>
+                <td class="px-4 py-3 text-xs text-gray-600">{{ p.descripcion }}</td>
+                <td class="px-4 py-3 text-xs text-gray-600">{{ p.nombreBodega }}</td>
+                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ p.totalEstantes ?? '—' }}</td>
+                <td class="px-4 py-3 text-center">
+                  @if (p.activo) {
+                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activo</span>
+                  } @else {
+                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactivo</span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button (click)="deletePasillo(p.idPasillo!)"
+                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin pasillos registrados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- ESTANTES TABLE -->
+  @if (activeTab === 'estantes') {
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Código</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descripción</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Niveles</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Cap. Total</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (e of estantes; track e.idEstante) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ e.idEstante }}</td>
+                <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-700">{{ e.codigo }}</td>
+                <td class="px-4 py-3 text-xs text-gray-600">{{ e.descripcion }}</td>
+                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ e.numNiveles ?? '—' }}</td>
+                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ e.capacidadTotal ?? '—' }}</td>
+                <td class="px-4 py-3 text-center">
+                  @if (e.activo) {
+                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activo</span>
+                  } @else {
+                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactivo</span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button (click)="deleteEstante(e.idEstante!)"
+                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin estantes registrados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ===== MODAL BODEGA ===== -->
+@if (showModal && modalTipo === 'bodega') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-800">Nueva Bodega</h3>
+        <button (click)="closeModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form [formGroup]="bodegaForm" (ngSubmit)="onSubmitBodega()" class="px-6 py-5 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
+          <input formControlName="nombre" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="Bodega Norte">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Dirección</label>
+            <input formControlName="direccion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Ciudad</label>
+            <input formControlName="ciudad" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">País</label>
+            <input formControlName="pais" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Capacidad total</label>
+            <input formControlName="capacidadTotal" type="number" min="0" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+          <button type="submit" [disabled]="bodegaForm.invalid" class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL PASILLO ===== -->
+@if (showModal && modalTipo === 'pasillo') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-800">Nuevo Pasillo</h3>
+        <button (click)="closeModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form [formGroup]="pasilloForm" (ngSubmit)="onSubmitPasillo()" class="px-6 py-5 space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Código *</label>
+            <input formControlName="codigo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="A">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Orden</label>
+            <input formControlName="numeroOrden" type="number" min="1" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+          <input formControlName="descripcion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Bodega *</label>
+          <select formControlName="idBodega" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <option [value]="null">Seleccionar bodega...</option>
+            @for (b of bodegas; track b.idBodega) {
+              <option [value]="b.idBodega">{{ b.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+          <button type="submit" [disabled]="pasilloForm.invalid" class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL ESTANTE ===== -->
+@if (showModal && modalTipo === 'estante') {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-800">Nuevo Estante</h3>
+        <button (click)="closeModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form [formGroup]="estanteForm" (ngSubmit)="onSubmitEstante()" class="px-6 py-5 space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Código *</label>
+            <input formControlName="codigo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="E1">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Niveles *</label>
+            <input formControlName="numNiveles" type="number" min="1" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Capacidad por nivel</label>
+            <input formControlName="capacidadPorNivel" type="number" min="0" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+            <input formControlName="descripcion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Pasillo *</label>
+          <select formControlName="idPasillo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <option [value]="null">Seleccionar pasillo...</option>
+            @for (p of pasillos; track p.idPasillo) {
+              <option [value]="p.idPasillo">{{ p.codigo }} — {{ p.nombreBodega }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+          <button type="submit" [disabled]="estanteForm.invalid" class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

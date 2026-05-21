@@ -1,0 +1,198 @@
+<div class="space-y-5">
+
+  <!-- ===== KPIs ÓRDENES ===== -->
+  <div>
+    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Órdenes</h3>
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900 font-mono">{{ ordenes.length }}</p>
+          <p class="text-xs text-gray-500">Total órdenes</p>
+          <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ formatCurrency(getTotalOrdenes()) }}</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold font-mono" [class]="ordenesPendientes.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ ordenesPendientes.length }}</p>
+          <p class="text-xs text-gray-500">Pendientes</p>
+          <p class="text-xs mt-0.5" [class]="ordenesPendientes.length > 0 ? 'text-yellow-500' : 'text-gray-400'">
+            {{ ordenesPendientes.length > 0 ? 'Requieren atención' : 'Todo procesado' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-cyan-600 font-mono">{{ ordenesEnTransito.length }}</p>
+          <p class="text-xs text-gray-500">En tránsito</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-green-600 font-mono">{{ ordenesEntregadas.length }}</p>
+          <p class="text-xs text-gray-500">Entregadas</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPIs INVENTARIO + PRODUCTOS ===== -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
+
+    <div>
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Inventario</h3>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          <p class="text-2xl font-bold text-gray-900 font-mono">{{ bodegas.length }}</p>
+          <p class="text-xs text-gray-500">Bodegas</p>
+          <p class="text-xs text-green-600 mt-0.5">{{ bodegasActivas.length }} activas</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          <p class="text-2xl font-bold text-gray-900 font-mono">{{ usuarios.length }}</p>
+          <p class="text-xs text-gray-500">Usuarios</p>
+          <p class="text-xs text-gray-400 mt-0.5">registrados</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          <p class="text-2xl font-bold text-gray-900 font-mono">{{ productos.length }}</p>
+          <p class="text-xs text-gray-500">Productos</p>
+          <p class="text-xs text-gray-400 mt-0.5">en catálogo</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Stock</h3>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          <p class="text-2xl font-bold text-green-600 font-mono">{{ productosActivos.length }}</p>
+          <p class="text-xs text-gray-500">Activos</p>
+        </div>
+        <div class="bg-white rounded-xl border border-yellow-100 shadow-sm p-4 text-center"
+          [class.border-yellow-200]="productosStockBajo.length > 0">
+          <p class="text-2xl font-bold font-mono" [class]="productosStockBajo.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ productosStockBajo.length }}</p>
+          <p class="text-xs text-gray-500">Stock bajo</p>
+          <p class="text-xs text-yellow-500 mt-0.5">{{ productosStockBajo.length > 0 ? 'menos de 10 uds' : '' }}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center"
+          [class.border-red-200]="productosAgotados.length > 0">
+          <p class="text-2xl font-bold font-mono" [class]="productosAgotados.length > 0 ? 'text-red-600' : 'text-gray-900'">{{ productosAgotados.length }}</p>
+          <p class="text-xs text-gray-500">Agotados</p>
+          <p class="text-xs text-red-500 mt-0.5">{{ productosAgotados.length > 0 ? 'sin stock' : '' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ÓRDENES RECIENTES + RESUMEN ESTADOS ===== -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+    <!-- Órdenes recientes -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Órdenes Recientes</h2>
+        <p class="text-xs text-gray-400 mt-0.5">{{ ordenes.length }} total · ordenadas por fecha</p>
+      </div>
+      @if (cargando) {
+        <div class="px-5 py-10 text-center text-xs text-gray-400">Cargando datos del backend...</div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Cliente</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fecha</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Estado</th>
+                <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (o of ordenesRecientes; track o.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-5 py-3 font-mono font-semibold text-xs text-gray-800">#{{ o.id }}</td>
+                  <td class="px-5 py-3 text-xs font-medium text-gray-800">{{ o.userNombre ?? '—' }}</td>
+                  <td class="px-5 py-3 text-xs text-gray-400">{{ formatDate(o.fechaOrden) }}</td>
+                  <td class="px-5 py-3">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="getEstadoBadge(o.estadoActual)">
+                      {{ o.estadoActual ?? '—' }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3 text-right font-mono text-xs font-semibold text-gray-800">
+                    {{ formatCurrency(o.total ?? 0) }}
+                  </td>
+                </tr>
+              }
+              @empty {
+                <tr><td colspan="5" class="px-5 py-8 text-center text-xs text-gray-400">Sin órdenes registradas.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- Resumen por estado -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Por Estado</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Distribución de órdenes</p>
+      </div>
+      <div class="divide-y divide-gray-50">
+        @for (e of resumenEstados; track e.estado) {
+          <div class="px-5 py-3 flex items-center justify-between">
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="e.badge">{{ e.estado }}</span>
+            <span class="font-mono text-sm font-bold text-gray-800">{{ e.cantidad }}</span>
+          </div>
+        }
+        @empty {
+          <div class="px-5 py-8 text-center text-xs text-gray-400">Sin datos</div>
+        }
+      </div>
+
+      <!-- Productos con alerta -->
+      @if (productosAgotados.length > 0 || productosStockBajo.length > 0) {
+        <div class="border-t border-gray-100 px-5 py-4">
+          <p class="text-xs font-semibold text-gray-600 mb-3">Alertas de Stock</p>
+          <div class="space-y-2">
+            @for (p of productosAgotados; track p.id) {
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-700 truncate max-w-36">{{ p.nombre }}</span>
+                <span class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Agotado</span>
+              </div>
+            }
+            @for (p of productosStockBajo; track p.id) {
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-700 truncate max-w-36">{{ p.nombre }}</span>
+                <span class="text-xs font-semibold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">{{ p.stock }} uds</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>
