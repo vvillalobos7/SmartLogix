@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, tap, of } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, tap, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Estado } from '../../shared/models/models';
+
+const ORDEN_NOMBRES = ['Pendiente','Procesando','Aprobado','En tránsito','Entregado','Cancelado'];
 
 @Injectable({ providedIn: 'root' })
 export class EstadoOrdenService {
@@ -24,14 +26,11 @@ export class EstadoOrdenService {
 
   getAll(): Observable<Estado[]> {
     return this.http.get<Estado[]>(this.baseUrl).pipe(
-      tap(data => {
-        const ordenEstados = data.filter(e =>
-          e.tipoDeEstado?.nombre === 'orden' ||
-          ['Pendiente','Procesando','Aprobado','En tránsito','Entregado','Cancelado'].includes(e.nombre)
-        );
-        if (ordenEstados.length > 0) {
-          this.estadosSubject.next(ordenEstados);
-        }
+      map(data => data.filter(e =>
+        e.tipoDeEstado?.nombre === 'orden' || ORDEN_NOMBRES.includes(e.nombre)
+      )),
+      tap(filtered => {
+        if (filtered.length > 0) this.estadosSubject.next(filtered);
       }),
       catchError(() => of(this.mockEstados)),
     );

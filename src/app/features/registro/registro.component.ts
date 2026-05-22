@@ -24,12 +24,6 @@ export class RegistroComponent {
   showPassword = false;
   showConfirm = false;
 
-  readonly roles = [
-    { value: 'bodeguero',     label: 'Bodeguero' },
-    { value: 'transportista', label: 'Transportista' },
-    { value: 'cliente',       label: 'Cliente' },
-  ];
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -40,8 +34,6 @@ export class RegistroComponent {
       apellido:       ['', [Validators.required, Validators.minLength(2)]],
       rut:            ['', [Validators.required, Validators.minLength(7), Validators.maxLength(12)]],
       correo:         ['', [Validators.required, Validators.email]],
-      cargo:          [''],
-      rolNombre:      [''],
       clave:          ['', [Validators.required, Validators.minLength(6)]],
       confirmarClave: ['', Validators.required],
     }, { validators: passwordMatch });

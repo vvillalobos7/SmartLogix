@@ -67,10 +67,16 @@ export class EstadosComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) return;
     const v = this.form.value;
-    const tipo = this.tiposDeEstado.find(t => t.id === v.tipoId);
-    const mock: Estado = { id: `est-${Date.now()}`, nombre: v.nombre, descripcion: v.descripcion, tipoDeEstado: tipo };
-    this.estados = [...this.estados, mock];
-    this.closeModal();
+    this.http.post<Estado>(this.estadosUrl, { nombre: v.nombre, descripcion: v.descripcion, tipoId: v.tipoId }).pipe(
+      catchError(() => {
+        const tipo = this.tiposDeEstado.find(t => t.id === v.tipoId);
+        return of({ id: `est-${Date.now()}`, nombre: v.nombre, descripcion: v.descripcion, tipoDeEstado: tipo } as Estado);
+      }),
+    ).subscribe(created => {
+      this.estados = [...this.estados, created];
+      this.closeModal();
+      this.cdr.markForCheck();
+    });
   }
 
   getEstadosByTipo(tipoId: string): Estado[] {

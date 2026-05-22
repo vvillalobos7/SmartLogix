@@ -4,6 +4,7 @@ import { OrdenService } from '../ordenes/orden.service';
 import { InventarioService } from '../inventario/inventario.service';
 import { ProductoService } from '../productos/producto.service';
 import { UsuarioService } from '../usuarios/usuario.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Orden, Bodega, Producto, Usuario } from '../../shared/models/models';
 
 @Component({
@@ -71,19 +72,29 @@ export class DashboardComponent implements OnInit {
     private inventarioService: InventarioService,
     private productoService: ProductoService,
     private usuarioService: UsuarioService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
 
+  get esCliente(): boolean {
+    return this.authService.hasRole('cliente');
+  }
+
   ngOnInit(): void {
-    this.ordenService.getAll().subscribe();
-    this.inventarioService.getBodegas().subscribe();
-    this.productoService.getAll().subscribe();
-    this.usuarioService.getAll().subscribe();
+    if (this.esCliente) {
+      this.ordenService.getMisOrdenes().subscribe();
+    } else {
+      this.ordenService.getAll().subscribe();
+      this.inventarioService.getBodegas().subscribe();
+      this.productoService.getAll().subscribe();
+      this.usuarioService.getAll().subscribe();
+
+      this.inventarioService.bodegas$.subscribe(b => { this.bodegas = b; this.cdr.markForCheck(); });
+      this.productoService.productos$.subscribe(p => { this.productos = p; this.cdr.markForCheck(); });
+      this.usuarioService.usuarios$.subscribe(u => { this.usuarios = u; this.cdr.markForCheck(); });
+    }
 
     this.ordenService.ordenes$.subscribe(o => { this.ordenes = o; this.cargando = false; this.cdr.markForCheck(); });
-    this.inventarioService.bodegas$.subscribe(b => { this.bodegas = b; this.cdr.markForCheck(); });
-    this.productoService.productos$.subscribe(p => { this.productos = p; this.cdr.markForCheck(); });
-    this.usuarioService.usuarios$.subscribe(u => { this.usuarios = u; this.cdr.markForCheck(); });
   }
 
   getEstadoBadge(estado?: string): string {

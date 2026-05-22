@@ -47,7 +47,7 @@ export class ProductosComponent implements OnInit {
     this.form = this.fb.group({
       nombre:      [p?.nombre ?? '',      [Validators.required, Validators.maxLength(200)]],
       descripcion: [p?.descripcion ?? '', []],
-      precio:      [p?.precio ?? 0,       [Validators.required, Validators.min(0)]],
+      precio:      [p?.precio ?? '',       [Validators.required, Validators.min(1)]],
       stock:       [p?.stock ?? 0,        [Validators.required, Validators.min(0)]],
       categoriaId: [p?.categoriaId ?? '', [Validators.required]],
       imagenUrl:   [p?.imagenUrl ?? '',   []],
@@ -60,11 +60,11 @@ export class ProductosComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) return;
-    const dto: ProductoRequest = this.form.value;
+    const { imagenUrl, ...dto } = this.form.value as ProductoRequest & { imagenUrl?: string };
     if (this.editando) {
-      this.productoService.update(this.editando.id, dto).subscribe();
+      this.productoService.update(this.editando.id, dto as ProductoRequest).subscribe();
     } else {
-      this.productoService.create(dto).subscribe();
+      this.productoService.create(dto as ProductoRequest).subscribe();
     }
     this.closeModal();
   }

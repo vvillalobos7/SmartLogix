@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   { path: 'login',     loadComponent: () => import('./features/login/login.component').then(m => m.LoginComponent)       },
@@ -10,14 +11,54 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard',  loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)   },
-      { path: 'productos',  loadComponent: () => import('./features/productos/productos.component').then(m => m.ProductosComponent)   },
-      { path: 'inventario', loadComponent: () => import('./features/inventario/inventario.component').then(m => m.InventarioComponent) },
-      { path: 'ordenes',    loadComponent: () => import('./features/ordenes/ordenes.component').then(m => m.OrdenesComponent)         },
-      { path: 'envios',     loadComponent: () => import('./features/envios/envios.component').then(m => m.EnviosComponent)           },
-      { path: 'estados',    loadComponent: () => import('./features/estados/estados.component').then(m => m.EstadosComponent)         },
-      { path: 'usuarios',   loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)      },
-      { path: 'roles',      loadComponent: () => import('./features/roles/roles.component').then(m => m.RolesComponent)               },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        data: { roles: ['admin', 'bodeguero', 'transportista', 'cliente'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'productos',
+        loadComponent: () => import('./features/productos/productos.component').then(m => m.ProductosComponent),
+        data: { roles: ['admin', 'bodeguero'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'inventario',
+        loadComponent: () => import('./features/inventario/inventario.component').then(m => m.InventarioComponent),
+        data: { roles: ['admin', 'bodeguero'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'ordenes',
+        loadComponent: () => import('./features/ordenes/ordenes.component').then(m => m.OrdenesComponent),
+        data: { roles: ['admin', 'bodeguero', 'transportista', 'cliente'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'envios',
+        loadComponent: () => import('./features/envios/envios.component').then(m => m.EnviosComponent),
+        data: { roles: ['admin', 'bodeguero', 'transportista'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'estados',
+        loadComponent: () => import('./features/estados/estados.component').then(m => m.EstadosComponent),
+        data: { roles: ['admin'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'usuarios',
+        loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent),
+        data: { roles: ['admin'] },
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'roles',
+        loadComponent: () => import('./features/roles/roles.component').then(m => m.RolesComponent),
+        data: { roles: ['admin'] },
+        canActivate: [roleGuard],
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

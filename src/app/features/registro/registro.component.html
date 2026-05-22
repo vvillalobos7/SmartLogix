@@ -84,29 +84,6 @@
             }
           </div>
 
-          <!-- Cargo y Rol -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Cargo</label>
-              <input type="text" formControlName="cargo"
-                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-                placeholder="Ej: Operador">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tipo de cuenta *</label>
-              <select formControlName="rolNombre"
-                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
-                <option value="">Seleccionar...</option>
-                @for (r of roles; track r.value) {
-                  <option [value]="r.value">{{ r.label }}</option>
-                }
-              </select>
-              @if (form.get('rolNombre')?.touched && form.get('rolNombre')?.invalid) {
-                <p class="text-xs text-red-500 mt-1">Selecciona un tipo.</p>
-              }
-            </div>
-          </div>
-
           <!-- Contraseña -->
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Contraseña *</label>
