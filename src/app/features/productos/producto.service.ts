@@ -6,91 +6,46 @@ import { Producto, ProductoRequest, Categoria } from '../../shared/models/models
 
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
-  private readonly baseUrl = environment.services.productos;
+  private readonly baseUrl      = environment.services.productos;
   private readonly categoriasUrl = environment.services.categorias;
 
-  private readonly mockCategorias: Categoria[] = [
-    { id: 'cat-1', nombre: 'Electrónica',  descripcion: 'Dispositivos electrónicos' },
-    { id: 'cat-2', nombre: 'Mobiliario',   descripcion: 'Muebles y accesorios de oficina' },
-    { id: 'cat-3', nombre: 'Embalaje',     descripcion: 'Materiales de empaque' },
-    { id: 'cat-4', nombre: 'Hogar',        descripcion: 'Artículos para el hogar' },
-  ];
+  private readonly productosSubject  = new BehaviorSubject<Producto[]>([]);
+  private readonly categoriasSubject = new BehaviorSubject<Categoria[]>([]);
 
-  private readonly mockProductos: Producto[] = [
-    { id: 'prod-1', nombre: 'Smartphone Samsung Galaxy A54', descripcion: 'Teléfono 256GB, AMOLED 6.4"', precio: 1250000, stock: 85,  categoriaId: 'cat-1', categoriaNombre: 'Electrónica', estadoNombre: 'Activo', activo: true },
-    { id: 'prod-2', nombre: 'Audífonos Sony WH-1000XM5',    descripcion: 'Inalámbricos, cancelación de ruido', precio: 980000, stock: 12, categoriaId: 'cat-1', categoriaNombre: 'Electrónica', estadoNombre: 'Activo', activo: true },
-    { id: 'prod-3', nombre: 'Silla Ergonómica Premium',     descripcion: 'Con soporte lumbar, reposabrazos 4D', precio: 850000, stock: 0,  categoriaId: 'cat-2', categoriaNombre: 'Mobiliario',  estadoNombre: 'Activo', activo: true },
-    { id: 'prod-4', nombre: 'Monitor LG UltraWide 34"',    descripcion: '3440x1440 IPS, 160Hz',               precio: 2100000, stock: 34, categoriaId: 'cat-1', categoriaNombre: 'Electrónica', estadoNombre: 'Activo', activo: true },
-    { id: 'prod-5', nombre: 'Caja de embalaje reforzada L', descripcion: 'Cartón doble pared 60x40x30cm',      precio: 8500,    stock: 850, categoriaId: 'cat-3', categoriaNombre: 'Embalaje',    estadoNombre: 'Activo', activo: true },
-    { id: 'prod-6', nombre: 'Termo Stanley Adventure 1L',   descripcion: 'Acero inoxidable, 24h frío',         precio: 185000,  stock: 7,   categoriaId: 'cat-4', categoriaNombre: 'Hogar',       estadoNombre: 'Activo', activo: true },
-  ];
-
-  private readonly productosSubject = new BehaviorSubject<Producto[]>(this.mockProductos);
-  productos$ = this.productosSubject.asObservable();
+  productos$  = this.productosSubject.asObservable();
+  categorias$ = this.categoriasSubject.asObservable();
 
   constructor(private readonly http: HttpClient) {}
+
+  // --- PRODUCTOS ---
 
   getAll(): Observable<Producto[]> {
     return this.http.get<Producto[]>(this.baseUrl).pipe(
       tap(data => this.productosSubject.next(data)),
-      catchError(() => {
-        this.productosSubject.next(this.mockProductos);
-        return of(this.mockProductos);
-      }),
+      catchError(() => of([])),
     );
   }
 
   getById(id: string): Observable<Producto> {
     return this.http.get<Producto>(`${this.baseUrl}/${id}`).pipe(
-      catchError(() => {
-        const found = this.mockProductos.find(p => p.id === id);
-        return found ? of(found) : throwError(() => new Error('Producto no encontrado'));
-      }),
+      catchError(() => throwError(() => new Error('Producto no encontrado'))),
     );
   }
 
-  getCategorias(): Observable<Categoria[]> {
-    return this.http.get<Categoria[]>(this.categoriasUrl).pipe(
-      catchError(() => of(this.mockCategorias)),
-    );
-  }
-
-  create(dto: ProductoRequest): Observable<Producto> {
+  create(dto: ProductoRequest): Observable<Producto | null> {
     return this.http.post<Producto>(this.baseUrl, dto).pipe(
       tap(created => this.productosSubject.next([...this.productosSubject.value, created])),
-      catchError(() => {
-        const cat = this.mockCategorias.find(c => c.id === dto.categoriaId);
-        const mock: Producto = {
-          id: `prod-${Date.now()}`,
-          nombre: dto.nombre,
-          descripcion: dto.descripcion,
-          precio: dto.precio,
-          stock: dto.stock,
-          categoriaId: dto.categoriaId,
-          categoriaNombre: cat?.nombre,
-          estadoNombre: dto.estadoNombre ?? 'Activo',
-          activo: true,
-        };
-        this.productosSubject.next([...this.productosSubject.value, mock]);
-        return of(mock);
-      }),
+      catchError(() => of(null)),
     );
   }
 
-  update(id: string, dto: ProductoRequest): Observable<Producto> {
+  update(id: string, dto: ProductoRequest): Observable<Producto | null> {
     return this.http.put<Producto>(`${this.baseUrl}/${id}`, dto).pipe(
       tap(updated => {
         const list = this.productosSubject.value.map(p => p.id === id ? updated : p);
         this.productosSubject.next(list);
       }),
-      catchError(() => {
-        const cat = this.mockCategorias.find(c => c.id === dto.categoriaId);
-        const list = this.productosSubject.value.map(p =>
-          p.id === id ? { ...p, ...dto, categoriaNombre: cat?.nombre ?? p.categoriaNombre } : p,
-        );
-        this.productosSubject.next(list);
-        return of(list.find(p => p.id === id) as Producto);
-      }),
+      catchError(() => of(null)),
     );
   }
 
@@ -104,23 +59,17 @@ export class ProductoService {
     );
   }
 
-  toggleActivo(id: string): Observable<Producto> {
+  toggleActivo(id: string): Observable<Producto | null> {
     return this.http.patch<Producto>(`${this.baseUrl}/${id}/toggle-activo`, {}).pipe(
       tap(updated => {
         const list = this.productosSubject.value.map(p => p.id === id ? updated : p);
         this.productosSubject.next(list);
       }),
-      catchError(() => {
-        const list = this.productosSubject.value.map(p =>
-          p.id === id ? { ...p, activo: !p.activo } : p,
-        );
-        this.productosSubject.next(list);
-        return of(list.find(p => p.id === id) as Producto);
-      }),
+      catchError(() => of(null)),
     );
   }
 
-  subirImagen(id: string, file: File): Observable<Producto> {
+  subirImagen(id: string, file: File): Observable<Producto | null> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<Producto>(`${this.baseUrl}/${id}/foto`, formData).pipe(
@@ -128,12 +77,7 @@ export class ProductoService {
         const list = this.productosSubject.value.map(p => p.id === id ? updated : p);
         this.productosSubject.next(list);
       }),
-      catchError(() => {
-        const url = URL.createObjectURL(file);
-        const list = this.productosSubject.value.map(p => p.id === id ? { ...p, imagenUrl: url } : p);
-        this.productosSubject.next(list);
-        return of(list.find(p => p.id === id) as Producto);
-      }),
+      catchError(() => of(null)),
     );
   }
 
@@ -143,9 +87,38 @@ export class ProductoService {
         const list = this.productosSubject.value.map(p => p.id === id ? { ...p, imagenUrl: undefined } : p);
         this.productosSubject.next(list);
       }),
+      catchError(() => of(undefined)),
+    );
+  }
+
+  // --- CATEGORÍAS ---
+
+  getCategorias(): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(this.categoriasUrl).pipe(
+      tap(data => this.categoriasSubject.next(data)),
+      catchError(() => of([])),
+    );
+  }
+
+  createCategoria(dto: { nombre: string; descripcion?: string }): Observable<Categoria | null> {
+    return this.http.post<Categoria>(this.categoriasUrl, dto).pipe(
+      tap(c => this.categoriasSubject.next([...this.categoriasSubject.value, c])),
+      catchError(() => of(null)),
+    );
+  }
+
+  updateCategoria(id: string, dto: { nombre: string; descripcion?: string }): Observable<Categoria | null> {
+    return this.http.put<Categoria>(`${this.categoriasUrl}/${id}`, dto).pipe(
+      tap(c => this.categoriasSubject.next(this.categoriasSubject.value.map(x => x.id === id ? c : x))),
+      catchError(() => of(null)),
+    );
+  }
+
+  deleteCategoria(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.categoriasUrl}/${id}`).pipe(
+      tap(() => this.categoriasSubject.next(this.categoriasSubject.value.filter(c => c.id !== id))),
       catchError(() => {
-        const list = this.productosSubject.value.map(p => p.id === id ? { ...p, imagenUrl: undefined } : p);
-        this.productosSubject.next(list);
+        this.categoriasSubject.next(this.categoriasSubject.value.filter(c => c.id !== id));
         return of(undefined);
       }),
     );

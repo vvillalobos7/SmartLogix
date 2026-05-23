@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, tap, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Bodega, BodegaRequest, Pasillo, PasilloRequest, Estante, EstanteRequest } from '../../shared/models/models';
+import {
+  Bodega, BodegaRequest,
+  Pasillo, PasilloRequest,
+  Estante, EstanteRequest,
+  EstPasi, EstPasiRequest,
+} from '../../shared/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class InventarioService {
@@ -11,33 +16,15 @@ export class InventarioService {
   private readonly urlEstantes = environment.services.inventarioEstantes;
   private readonly urlEstPasi  = environment.services.inventarioEstPasi;
 
-  private mockBodegas: Bodega[] = [
-    { idBodega: 1, nombre: 'Bodega Norte',       direccion: 'Calle 80 # 45-12', ciudad: 'Bogotá',       pais: 'Colombia', capacidadTotal: 5000, activa: true,  totalPasillos: 2 },
-    { idBodega: 2, nombre: 'Bodega Sur',          direccion: 'Av. 68 # 12-34',   ciudad: 'Bogotá',       pais: 'Colombia', capacidadTotal: 3000, activa: true,  totalPasillos: 1 },
-    { idBodega: 3, nombre: 'Bodega Puerto',       direccion: 'Zona Franca Lote 5',ciudad: 'Barranquilla', pais: 'Colombia', capacidadTotal: 8000, activa: true,  totalPasillos: 0 },
-    { idBodega: 4, nombre: 'Bodega Eje Cafetero', direccion: 'Carrera 23 # 19-01',ciudad: 'Manizales',   pais: 'Colombia', capacidadTotal: 2000, activa: false, totalPasillos: 0 },
-  ];
-
-  private mockPasillos: Pasillo[] = [
-    { idPasillo: 1, codigo: 'A', descripcion: 'Pasillo A', numeroOrden: 1, activo: true,  idBodega: 1, nombreBodega: 'Bodega Norte', totalEstantes: 2 },
-    { idPasillo: 2, codigo: 'B', descripcion: 'Pasillo B', numeroOrden: 2, activo: true,  idBodega: 1, nombreBodega: 'Bodega Norte', totalEstantes: 1 },
-    { idPasillo: 3, codigo: 'A', descripcion: 'Pasillo A', numeroOrden: 1, activo: true,  idBodega: 2, nombreBodega: 'Bodega Sur',   totalEstantes: 1 },
-  ];
-
-  private mockEstantes: Estante[] = [
-    { idEstante: 1, codigo: 'E1', descripcion: 'Estante 1', numNiveles: 5, capacidadPorNivel: 100, capacidadTotal: 500, activo: true,  idPasillo: 1 },
-    { idEstante: 2, codigo: 'E2', descripcion: 'Estante 2', numNiveles: 5, capacidadPorNivel: 100, capacidadTotal: 500, activo: true,  idPasillo: 1 },
-    { idEstante: 3, codigo: 'E1', descripcion: 'Estante 1', numNiveles: 3, capacidadPorNivel: 80,  capacidadTotal: 240, activo: true,  idPasillo: 2 },
-    { idEstante: 4, codigo: 'E1', descripcion: 'Estante 1', numNiveles: 4, capacidadPorNivel: 90,  capacidadTotal: 360, activo: false, idPasillo: 3 },
-  ];
-
-  private bodegasSubject  = new BehaviorSubject<Bodega[]>(this.mockBodegas);
-  private pasillosSubject = new BehaviorSubject<Pasillo[]>(this.mockPasillos);
-  private estantesSubject = new BehaviorSubject<Estante[]>(this.mockEstantes);
+  private bodegasSubject  = new BehaviorSubject<Bodega[]>([]);
+  private pasillosSubject = new BehaviorSubject<Pasillo[]>([]);
+  private estantesSubject = new BehaviorSubject<Estante[]>([]);
+  private estPasiSubject  = new BehaviorSubject<EstPasi[]>([]);
 
   bodegas$  = this.bodegasSubject.asObservable();
   pasillos$ = this.pasillosSubject.asObservable();
   estantes$ = this.estantesSubject.asObservable();
+  estPasi$  = this.estPasiSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -46,41 +33,33 @@ export class InventarioService {
   getBodegas(): Observable<Bodega[]> {
     return this.http.get<Bodega[]>(this.urlBodegas).pipe(
       tap(data => this.bodegasSubject.next(data)),
-      catchError(() => { this.bodegasSubject.next(this.mockBodegas); return of(this.mockBodegas); }),
+      catchError(() => of([])),
     );
   }
 
   getBodegasActivas(): Observable<Bodega[]> {
     return this.http.get<Bodega[]>(`${this.urlBodegas}/activas`).pipe(
-      catchError(() => of(this.mockBodegas.filter(b => b.activa))),
+      catchError(() => of([])),
     );
   }
 
-  getBodegaById(id: number): Observable<Bodega> {
+  getBodegaById(id: number): Observable<Bodega | undefined> {
     return this.http.get<Bodega>(`${this.urlBodegas}/${id}`).pipe(
-      catchError(() => of(this.mockBodegas.find(b => b.idBodega === id)!)),
+      catchError(() => of(undefined)),
     );
   }
 
-  createBodega(dto: BodegaRequest): Observable<Bodega> {
+  createBodega(dto: BodegaRequest): Observable<Bodega | null> {
     return this.http.post<Bodega>(this.urlBodegas, dto).pipe(
       tap(b => this.bodegasSubject.next([...this.bodegasSubject.value, b])),
-      catchError(() => {
-        const mock: Bodega = { ...dto, idBodega: Date.now(), activa: true, totalPasillos: 0 };
-        this.bodegasSubject.next([...this.bodegasSubject.value, mock]);
-        return of(mock);
-      }),
+      catchError(() => of(null)),
     );
   }
 
-  updateBodega(id: number, dto: BodegaRequest): Observable<Bodega> {
+  updateBodega(id: number, dto: BodegaRequest): Observable<Bodega | null> {
     return this.http.put<Bodega>(`${this.urlBodegas}/${id}`, dto).pipe(
       tap(b => this.bodegasSubject.next(this.bodegasSubject.value.map(x => x.idBodega === id ? b : x))),
-      catchError(() => {
-        const list = this.bodegasSubject.value.map(b => b.idBodega === id ? { ...b, ...dto } : b);
-        this.bodegasSubject.next(list);
-        return of(list.find(b => b.idBodega === id)!);
-      }),
+      catchError(() => of(null)),
     );
   }
 
@@ -94,9 +73,9 @@ export class InventarioService {
     );
   }
 
-  toggleBodega(id: number): Observable<Bodega> {
+  toggleBodega(id: number): Observable<Bodega | null> {
     const current = this.bodegasSubject.value.find(b => b.idBodega === id);
-    if (!current) return of(undefined as any);
+    if (!current) return of(null);
     const dto: BodegaRequest = {
       nombre: current.nombre,
       direccion: current.direccion,
@@ -107,13 +86,7 @@ export class InventarioService {
     };
     return this.http.put<Bodega>(`${this.urlBodegas}/${id}`, dto).pipe(
       tap(b => this.bodegasSubject.next(this.bodegasSubject.value.map(x => x.idBodega === id ? b : x))),
-      catchError(() => {
-        const list = this.bodegasSubject.value.map(b =>
-          b.idBodega === id ? { ...b, activa: !b.activa } : b,
-        );
-        this.bodegasSubject.next(list);
-        return of(list.find(b => b.idBodega === id)!);
-      }),
+      catchError(() => of(null)),
     );
   }
 
@@ -122,42 +95,33 @@ export class InventarioService {
   getPasillos(): Observable<Pasillo[]> {
     return this.http.get<Pasillo[]>(this.urlPasillos).pipe(
       tap(data => this.pasillosSubject.next(data)),
-      catchError(() => { this.pasillosSubject.next(this.mockPasillos); return of(this.mockPasillos); }),
+      catchError(() => of([])),
     );
   }
 
   getPasillosByBodega(bodegaId: number): Observable<Pasillo[]> {
     return this.http.get<Pasillo[]>(`${this.urlPasillos}/bodega/${bodegaId}`).pipe(
-      catchError(() => of(this.mockPasillos.filter(p => p.idBodega === bodegaId))),
+      catchError(() => of([])),
     );
   }
 
-  createPasillo(dto: PasilloRequest): Observable<Pasillo> {
+  createPasillo(dto: PasilloRequest): Observable<Pasillo | null> {
     return this.http.post<Pasillo>(this.urlPasillos, dto).pipe(
       tap(p => this.pasillosSubject.next([...this.pasillosSubject.value, p])),
-      catchError(() => {
-        const bodega = this.bodegasSubject.value.find(b => b.idBodega === dto.idBodega);
-        const mock: Pasillo = { ...dto, idPasillo: Date.now(), activo: true, nombreBodega: bodega?.nombre, totalEstantes: 0 };
-        this.pasillosSubject.next([...this.pasillosSubject.value, mock]);
-        return of(mock);
-      }),
+      catchError(() => of(null)),
     );
   }
 
-  updatePasillo(id: number, dto: PasilloRequest): Observable<Pasillo> {
+  updatePasillo(id: number, dto: PasilloRequest): Observable<Pasillo | null> {
     return this.http.put<Pasillo>(`${this.urlPasillos}/${id}`, dto).pipe(
       tap(p => this.pasillosSubject.next(this.pasillosSubject.value.map(x => x.idPasillo === id ? p : x))),
-      catchError(() => {
-        const list = this.pasillosSubject.value.map(p => p.idPasillo === id ? { ...p, ...dto } : p);
-        this.pasillosSubject.next(list);
-        return of(list.find(p => p.idPasillo === id)!);
-      }),
+      catchError(() => of(null)),
     );
   }
 
-  togglePasillo(id: number): Observable<Pasillo> {
+  togglePasillo(id: number): Observable<Pasillo | null> {
     const current = this.pasillosSubject.value.find(p => p.idPasillo === id);
-    if (!current) return of(undefined as any);
+    if (!current) return of(null);
     const dto: PasilloRequest = {
       codigo: current.codigo,
       descripcion: current.descripcion,
@@ -183,47 +147,20 @@ export class InventarioService {
   getEstantes(): Observable<Estante[]> {
     return this.http.get<Estante[]>(this.urlEstantes).pipe(
       tap(data => this.estantesSubject.next(data)),
-      catchError(() => { this.estantesSubject.next(this.mockEstantes); return of(this.mockEstantes); }),
+      catchError(() => of([])),
     );
   }
 
   getEstantesByPasillo(pasilloId: number): Observable<Estante[]> {
     return this.http.get<Estante[]>(`${this.urlEstantes}/por-pasillo/${pasilloId}`).pipe(
-      catchError(() => of(this.mockEstantes.filter(e => e.idPasillo === pasilloId))),
+      catchError(() => of([])),
     );
   }
 
-  createEstante(dto: EstanteRequest): Observable<Estante> {
+  createEstante(dto: EstanteRequest): Observable<Estante | null> {
     return this.http.post<Estante>(this.urlEstantes, dto).pipe(
       tap(e => this.estantesSubject.next([...this.estantesSubject.value, e])),
-      catchError(() => {
-        const mock: Estante = {
-          ...dto,
-          idEstante: Date.now(),
-          activo: true,
-          capacidadTotal: (dto.numNiveles ?? 1) * (dto.capacidadPorNivel ?? 0),
-        };
-        this.estantesSubject.next([...this.estantesSubject.value, mock]);
-        return of(mock);
-      }),
-    );
-  }
-
-  createEstPasiLink(idEstante: number, idPasillo: number): Observable<unknown> {
-    return this.http.post(this.urlEstPasi, { idEstante, idPasillo }).pipe(
-      tap(() => {
-        const list = this.estantesSubject.value.map(e =>
-          e.idEstante === idEstante ? { ...e, idPasillo } : e,
-        );
-        this.estantesSubject.next(list);
-      }),
-      catchError(() => {
-        const list = this.estantesSubject.value.map(e =>
-          e.idEstante === idEstante ? { ...e, idPasillo } : e,
-        );
-        this.estantesSubject.next(list);
-        return of(undefined);
-      }),
+      catchError(() => of(null)),
     );
   }
 
@@ -232,6 +169,43 @@ export class InventarioService {
       tap(() => this.estantesSubject.next(this.estantesSubject.value.filter(e => e.idEstante !== id))),
       catchError(() => {
         this.estantesSubject.next(this.estantesSubject.value.filter(e => e.idEstante !== id));
+        return of(undefined);
+      }),
+    );
+  }
+
+  // --- EST-PASI ---
+
+  getEstPasi(): Observable<EstPasi[]> {
+    return this.http.get<EstPasi[]>(this.urlEstPasi).pipe(
+      tap(data => this.estPasiSubject.next(data)),
+      catchError(() => of([])),
+    );
+  }
+
+  createEstPasi(dto: EstPasiRequest): Observable<EstPasi | null> {
+    return this.http.post<EstPasi>(this.urlEstPasi, dto).pipe(
+      tap(ep => this.estPasiSubject.next([...this.estPasiSubject.value, ep])),
+      catchError(() => of(null)),
+    );
+  }
+
+  createEstPasiLink(idEstante: number, idPasillo: number): Observable<EstPasi | null> {
+    return this.createEstPasi({ idEstante, idPasillo });
+  }
+
+  updateEstPasi(id: number, dto: EstPasiRequest): Observable<EstPasi | null> {
+    return this.http.put<EstPasi>(`${this.urlEstPasi}/${id}`, dto).pipe(
+      tap(ep => this.estPasiSubject.next(this.estPasiSubject.value.map(x => x.idEstPasi === id ? ep : x))),
+      catchError(() => of(null)),
+    );
+  }
+
+  deleteEstPasi(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.urlEstPasi}/${id}`).pipe(
+      tap(() => this.estPasiSubject.next(this.estPasiSubject.value.filter(ep => ep.idEstPasi !== id))),
+      catchError(() => {
+        this.estPasiSubject.next(this.estPasiSubject.value.filter(ep => ep.idEstPasi !== id));
         return of(undefined);
       }),
     );

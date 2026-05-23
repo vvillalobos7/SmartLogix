@@ -155,6 +155,36 @@ export interface EstanteRequest {
   idPasillo?: number;
 }
 
+export interface EstPasi {
+  idEstPasi?: number;
+  idEstante?: number;
+  codigoEstante?: string;
+  descripcionEstante?: string;
+  numNiveles?: number;
+  idPasillo?: number;
+  codigoPasillo?: string;
+  descripcionPasillo?: string;
+  idBodega?: number;
+  nombreBodega?: string;
+  posicion?: string;
+  numeroFila?: number;
+  ocupacionPct?: number;
+  habilitada?: boolean;
+  observaciones?: string;
+  fechaAsignacion?: string;
+  fechaActualizacion?: string;
+}
+
+export interface EstPasiRequest {
+  idEstante: number;
+  idPasillo: number;
+  posicion?: string;
+  numeroFila?: number;
+  ocupacionPct?: number;
+  habilitada?: boolean;
+  observaciones?: string;
+}
+
 // --- CATEGORÍAS ---
 
 export interface Categoria {

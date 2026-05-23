@@ -4,44 +4,68 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
       <h2 class="text-base font-semibold text-gray-800">Catálogo de Productos</h2>
-      <p class="text-xs text-gray-400 mt-0.5">{{ productos.length }} productos en catálogo</p>
+      <p class="text-xs text-gray-400 mt-0.5">{{ productos.length }} productos · {{ categorias.length }} categorías</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input [(ngModel)]="filtro" type="text" placeholder="Nombre, categoría..."
-          class="pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 w-44"
-          [ngModelOptions]="{standalone: true}">
-      </div>
-      <!-- Filtro País -->
-      <select [(ngModel)]="filtroPais" [ngModelOptions]="{standalone: true}"
-        class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
-        <option value="">Todos los países</option>
-        @for (pais of paisesList; track pais) {
-          <option [value]="pais">{{ pais }}</option>
-        }
-      </select>
-      <!-- Filtro Bodega -->
-      <select [(ngModel)]="filtroBodegaId" [ngModelOptions]="{standalone: true}"
-        class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
-        <option [value]="null">Todas las bodegas</option>
-        @for (b of bodegas; track b.idBodega) {
-          <option [value]="b.idBodega">{{ b.nombre }}</option>
-        }
-      </select>
-      <button (click)="openNew()"
-        class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Nuevo Producto
-      </button>
+      @if (activeTab === 'productos') {
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input [(ngModel)]="filtro" type="text" placeholder="Nombre, categoría..."
+            class="pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 w-44"
+            [ngModelOptions]="{standalone: true}">
+        </div>
+        <select [(ngModel)]="filtroPais" [ngModelOptions]="{standalone: true}"
+          class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
+          <option value="">Todos los países</option>
+          @for (pais of paisesList; track pais) {
+            <option [value]="pais">{{ pais }}</option>
+          }
+        </select>
+        <select [(ngModel)]="filtroBodegaId" [ngModelOptions]="{standalone: true}"
+          class="px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
+          <option [value]="null">Todas las bodegas</option>
+          @for (b of bodegas; track b.idBodega) {
+            <option [value]="b.idBodega">{{ b.nombre }}</option>
+          }
+        </select>
+        <button (click)="openNew()"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nuevo Producto
+        </button>
+      }
+      @if (activeTab === 'categorias') {
+        <button (click)="openNewCategoria()"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nueva Categoría
+        </button>
+      }
     </div>
   </div>
 
-  <!-- Table -->
+  <!-- Tabs -->
+  <div class="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
+    <button (click)="activeTab = 'productos'"
+      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
+      [class]="activeTab === 'productos' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+      Productos ({{ productos.length }})
+    </button>
+    <button (click)="activeTab = 'categorias'"
+      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
+      [class]="activeTab === 'categorias' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+      Categorías ({{ categorias.length }})
+    </button>
+  </div>
+
+  <!-- TABLA PRODUCTOS -->
+  @if (activeTab === 'productos') {
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -143,6 +167,60 @@
       </table>
     </div>
   </div>
+  } <!-- end @if productos -->
+
+  <!-- TABLA CATEGORÍAS -->
+  @if (activeTab === 'categorias') {
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nombre</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descripción</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Productos</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (c of categorias; track c.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3">
+                  <span class="text-xs font-semibold text-gray-800 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{{ c.nombre }}</span>
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-500">{{ c.descripcion ?? '—' }}</td>
+                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">
+                  {{ countProductosByCategoria(c.id) }} {{ countProductosByCategoria(c.id) === 1 ? 'producto' : 'productos' }}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button (click)="openEditCategoria(c)" title="Editar"
+                      class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                    </button>
+                    <button (click)="deleteCategoria(c.id)" title="Eliminar"
+                      class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="4" class="px-4 py-8 text-center text-xs text-gray-400">Sin categorías registradas.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
 </div>
 
 <!-- ===== MODAL CREAR/EDITAR ===== -->
@@ -365,6 +443,55 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL CATEGORÍA ===== -->
+@if (showCategoriaModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800">{{ categoriaEditando ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
+          <p class="text-xs text-gray-400">Define nombre y descripción</p>
+        </div>
+        <button (click)="closeCategoriaModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="categoriaForm" (ngSubmit)="onSubmitCategoria()" class="px-6 py-5 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
+          <input formControlName="nombre"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
+            placeholder="Ej: Electrónica">
+          @if (categoriaForm.get('nombre')?.invalid && categoriaForm.get('nombre')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Nombre requerido.</p>
+          }
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+          <textarea formControlName="descripcion" rows="3"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 resize-none"
+            placeholder="Descripción opcional de la categoría"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" (click)="closeCategoriaModal()"
+            class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="categoriaForm.invalid"
+            class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg transition-colors">
+            {{ categoriaEditando ? 'Actualizar' : 'Crear Categoría' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }
