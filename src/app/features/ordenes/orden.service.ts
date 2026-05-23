@@ -88,5 +88,25 @@ export class OrdenService {
     );
   }
 
+  tomarOrden(id: number): Observable<Orden> {
+    return this.http.post<Orden>(`${this.baseUrl}/${id}/tomar`, {}).pipe(
+      tap(updated => {
+        const normalized = this.normalizeOrden(updated);
+        this.ordenesSubject.next(this.ordenesSubject.value.map(o => o.id === id ? normalized : o));
+      }),
+      catchError(err => throwError(() => err)),
+    );
+  }
+
+  liberarOrden(id: number): Observable<Orden> {
+    return this.http.post<Orden>(`${this.baseUrl}/${id}/liberar`, {}).pipe(
+      tap(updated => {
+        const normalized = this.normalizeOrden(updated);
+        this.ordenesSubject.next(this.ordenesSubject.value.map(o => o.id === id ? normalized : o));
+      }),
+      catchError(err => throwError(() => err)),
+    );
+  }
+
   getSnapshot(): Orden[] { return this.ordenesSubject.value; }
 }

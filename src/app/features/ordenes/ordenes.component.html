@@ -52,8 +52,10 @@
             <tr class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="openDetalle(o)">
               <td class="px-4 py-3 font-mono font-semibold text-xs text-gray-800">#{{ o.id }}</td>
               <td class="px-4 py-3">
-                <div class="text-xs font-medium text-gray-800">{{ o.userNombre ?? '—' }}</div>
-                <div class="text-xs text-gray-400 font-mono truncate max-w-32">{{ o.userId ?? '' }}</div>
+                @if (o.userNombre) {
+                  <div class="text-xs font-medium text-gray-800">{{ o.userNombre }}</div>
+                }
+                <div class="text-xs text-gray-400 truncate max-w-48">{{ o.direccionTexto ?? ('ID: ' + (o.direccionId ?? '—')) }}</div>
               </td>
               <td class="px-4 py-3 text-xs text-gray-500">{{ formatDate(o.fechaOrden) }}</td>
               <td class="px-4 py-3">
@@ -118,8 +120,17 @@
         </button>
       </div>
       <div class="px-6 py-4 space-y-4">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
           <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="getEstadoBadge(ordenDetalle.estadoActual)">{{ ordenDetalle.estadoActual }}</span>
+          @if (ordenDetalle.direccionTexto) {
+            <span class="text-xs text-gray-500">
+              <svg class="w-3 h-3 inline mr-0.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              {{ ordenDetalle.direccionTexto }}
+            </span>
+          }
         </div>
 
         <!-- Detalles productos -->

@@ -2,7 +2,6 @@
 
   <!-- KPIs -->
   <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-
     <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center gap-4">
       <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,7 +13,6 @@
         <p class="text-xs text-indigo-500">Listos para envío</p>
       </div>
     </div>
-
     <div class="bg-cyan-50 border border-cyan-100 rounded-xl p-4 flex items-center gap-4">
       <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +24,6 @@
         <p class="text-xs text-cyan-500">En tránsito</p>
       </div>
     </div>
-
     <div class="bg-green-50 border border-green-100 rounded-xl p-4 flex items-center gap-4">
       <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +35,6 @@
         <p class="text-xs text-green-500">Entregados</p>
       </div>
     </div>
-
     <div class="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-4">
       <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,36 +50,24 @@
 
   <!-- Tabla principal -->
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-
-    <!-- Header con filtros -->
     <div class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <h2 class="text-sm font-semibold text-gray-700">Coordinación de Envíos</h2>
         <p class="text-xs text-gray-400 mt-0.5">Seguimiento y actualización de estado de envíos</p>
       </div>
-
-      <!-- Filtros -->
       <div class="flex gap-1.5 flex-wrap">
         <button (click)="setFiltro('todos')"
           [class]="filtroActivo === 'todos' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">
-          Todos
-        </button>
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Todos</button>
         <button (click)="setFiltro('Aprobado')"
           [class]="filtroActivo === 'Aprobado' ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'"
-          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">
-          Aprobados ({{ aprobados.length }})
-        </button>
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Aprobados ({{ aprobados.length }})</button>
         <button (click)="setFiltro('En tránsito')"
           [class]="filtroActivo === 'En tránsito' ? 'bg-cyan-600 text-white' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'"
-          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">
-          En tránsito ({{ enTransito.length }})
-        </button>
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">En tránsito ({{ enTransito.length }})</button>
         <button (click)="setFiltro('Entregado')"
           [class]="filtroActivo === 'Entregado' ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100'"
-          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">
-          Entregados ({{ entregados.length }})
-        </button>
+          class="px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Entregados ({{ entregados.length }})</button>
       </div>
     </div>
 
@@ -92,7 +76,12 @@
         <thead class="bg-gray-50 border-b border-gray-100">
           <tr>
             <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID Orden</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Cliente / Destino</th>
+            <!-- Bodeguero no ve quién creó la orden -->
+            @if (!esBodeguero) {
+              <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Cliente / Destino</th>
+            } @else {
+              <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Destino</th>
+            }
             <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fecha Orden</th>
             <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Estado Envío</th>
             <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Total</th>
@@ -106,8 +95,18 @@
             <tr class="hover:bg-gray-50 transition-colors">
               <td class="px-5 py-3 font-mono font-bold text-xs text-gray-800">#{{ o.id }}</td>
               <td class="px-5 py-3">
-                <p class="text-xs font-semibold text-gray-800">{{ o.userNombre ?? 'Cliente' }}</p>
-                <p class="text-xs text-gray-400">Dir. ID: {{ o.direccionId ?? 'Sin dirección' }}</p>
+                @if (!esBodeguero) {
+                  <p class="text-xs font-semibold text-gray-800">{{ o.userNombre ?? 'Cliente' }}</p>
+                }
+                <p class="text-xs text-gray-500">{{ o.direccionTexto ?? ('Dir. ' + (o.direccionId ?? 'Sin dirección')) }}</p>
+                <!-- Solo admin ve quién tomó la ruta -->
+                @if (esAdmin && o.tomada && o.transportistaId) {
+                  <p class="text-xs text-indigo-500 mt-0.5">Transportista: {{ o.transportistaId | slice:0:8 }}…</p>
+                }
+                <!-- Transportista ve si está tomada por otro (sin saber quién) -->
+                @if (tomadaPorOtro(o)) {
+                  <span class="inline-block mt-0.5 text-xs px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded font-semibold">En proceso por otro</span>
+                }
               </td>
               <td class="px-5 py-3 text-xs text-gray-500">{{ formatDate(o.fechaOrden) }}</td>
               <td class="px-5 py-3">
@@ -123,14 +122,38 @@
               </td>
               @if (puedeActualizar) {
                 <td class="px-5 py-3 text-center">
-                  @if (o.estadoActual !== 'Entregado' && o.estadoActual !== 'Cancelado') {
-                    <button (click)="abrirModal(o)"
-                      class="text-xs px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors font-semibold">
-                      Actualizar
-                    </button>
-                  } @else {
-                    <span class="text-xs text-gray-300">—</span>
-                  }
+                  <div class="flex gap-1.5 justify-center flex-wrap">
+                    <!-- Admin / Bodeguero: actualizar estado directamente -->
+                    @if (puedeActualizarEstado(o)) {
+                      <button (click)="abrirModal(o)"
+                        class="text-xs px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors font-semibold">
+                        Actualizar
+                      </button>
+                    }
+                    <!-- Transportista: tomar ruta disponible -->
+                    @if (puedeTomar(o)) {
+                      <button (click)="tomarOrden(o)"
+                        class="text-xs px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold">
+                        Tomar ruta
+                      </button>
+                    }
+                    <!-- Transportista: liberar o actualizar su ruta -->
+                    @if (puedeLiberar(o)) {
+                      <button (click)="liberarOrden(o)"
+                        class="text-xs px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                        Liberar
+                      </button>
+                    }
+                    @if (puedeActualizarComoTransportista(o)) {
+                      <button (click)="abrirModal(o)"
+                        class="text-xs px-3 py-1 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors font-semibold">
+                        Actualizar
+                      </button>
+                    }
+                    @if (!puedeActualizarEstado(o) && !puedeTomar(o) && !puedeLiberar(o) && !puedeActualizarComoTransportista(o) && !tomadaPorOtro(o)) {
+                      <span class="text-xs text-gray-300">—</span>
+                    }
+                  </div>
                 </td>
               }
             </tr>
@@ -147,7 +170,7 @@
     </div>
   </div>
 
-  <!-- Historial de última actividad -->
+  <!-- Envíos en tránsito -->
   @if (enTransito.length > 0) {
     <div class="bg-cyan-50 border border-cyan-100 rounded-xl p-4">
       <div class="flex items-center gap-2 mb-3">
@@ -159,7 +182,10 @@
           <div class="bg-white rounded-lg border border-cyan-100 px-3 py-2 flex items-center justify-between">
             <div>
               <p class="text-xs font-bold text-gray-800 font-mono">#{{ o.id }}</p>
-              <p class="text-xs text-gray-500">{{ o.userNombre ?? 'Cliente' }}</p>
+              @if (!esBodeguero) {
+                <p class="text-xs text-gray-500">{{ o.userNombre ?? 'Cliente' }}</p>
+              }
+              <p class="text-xs text-gray-400">{{ o.direccionTexto ?? '' }}</p>
             </div>
             <span class="text-xs text-cyan-600 font-semibold">En ruta</span>
           </div>
@@ -170,17 +196,18 @@
 
 </div>
 
-<!-- ===== MODAL ACTUALIZAR ESTADO ===== -->
+<!-- MODAL ACTUALIZAR ESTADO -->
 @if (showModal && ordenSeleccionada) {
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
       <div class="px-6 py-5 border-b border-gray-100">
         <h3 class="text-sm font-bold text-gray-800">Actualizar estado del envío</h3>
-        <p class="text-xs text-gray-400 mt-0.5">Orden <span class="font-mono font-bold">#{{ ordenSeleccionada.id }}</span> · {{ ordenSeleccionada.userNombre ?? 'Cliente' }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">
+          Orden <span class="font-mono font-bold">#{{ ordenSeleccionada.id }}</span>
+          @if (!esBodeguero && ordenSeleccionada.userNombre) { · {{ ordenSeleccionada.userNombre }} }
+        </p>
       </div>
-
       <form [formGroup]="estadoForm" (ngSubmit)="onSubmit()" class="px-6 py-5 space-y-4">
-
         <div>
           <p class="text-xs text-gray-500 mb-2">Estado actual:
             <span class="font-semibold ml-1 px-2 py-0.5 rounded-full text-xs" [class]="getEstadoBadge(ordenSeleccionada.estadoActual)">
@@ -188,7 +215,6 @@
             </span>
           </p>
         </div>
-
         <div>
           <label for="estadoId" class="block text-xs font-semibold text-gray-600 mb-1.5">Nuevo estado *</label>
           <select id="estadoId" formControlName="estadoId"
@@ -199,14 +225,12 @@
             }
           </select>
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1.5">Comentario u observación</label>
-          <textarea formControlName="comentario" rows="3"
+          <label for="comentario-envio" class="block text-xs font-semibold text-gray-600 mb-1.5">Comentario u observación</label>
+          <textarea id="comentario-envio" formControlName="comentario" rows="3"
             class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
             placeholder="Ej: Entregado en portería, firmado por..."></textarea>
         </div>
-
         <div class="flex gap-3 pt-2">
           <button type="button" (click)="cerrarModal()"
             class="flex-1 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">

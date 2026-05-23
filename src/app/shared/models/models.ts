@@ -249,9 +249,12 @@ export interface Orden {
   id: number;
   fechaOrden?: string;
   direccionId?: string;
+  direccionTexto?: string;
   userId?: string;
   userNombre?: string;
   estadoActual?: string;
+  tomada?: boolean;
+  transportistaId?: string;
   detalles?: OrdenDetalle[];
   historial?: HistorialEntry[];
   total?: number;

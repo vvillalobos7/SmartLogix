@@ -5,6 +5,7 @@ import { OrdenService } from '../ordenes/orden.service';
 import { EstadoOrdenService } from '../ordenes/estado.service';
 import { Orden, HistorialRequest, Estado } from '../../shared/models/models';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-envios',
@@ -24,47 +25,33 @@ export class EnviosComponent implements OnInit {
 
   private readonly estadosEnvioNombres = ['En tránsito', 'Entregado', 'Cancelado'];
 
-  get esTransportista(): boolean {
-    return this.authService.hasRole('transportista');
-  }
-
-  get esAdmin(): boolean {
-    return this.authService.hasRole('admin', 'bodeguero');
-  }
+  get esTransportista(): boolean { return this.authService.hasRole('transportista'); }
+  get esAdmin(): boolean         { return this.authService.hasRole('admin'); }
+  get esBodeguero(): boolean     { return this.authService.hasRole('bodeguero'); }
+  get miUserId(): string         { return this.authService.getCurrentUser()?.userId ?? ''; }
 
   get puedeActualizar(): boolean {
     return this.authService.hasRole('admin', 'bodeguero', 'transportista');
   }
 
-  get aprobados(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Aprobado');
-  }
-
-  get enTransito(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'En tránsito');
-  }
-
-  get entregados(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Entregado');
-  }
-
-  get cancelados(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Cancelado');
-  }
+  get aprobados(): Orden[]  { return this.ordenes.filter(o => o.estadoActual === 'Aprobado'); }
+  get enTransito(): Orden[] { return this.ordenes.filter(o => o.estadoActual === 'En tránsito'); }
+  get entregados(): Orden[] { return this.ordenes.filter(o => o.estadoActual === 'Entregado'); }
+  get cancelados(): Orden[] { return this.ordenes.filter(o => o.estadoActual === 'Cancelado'); }
 
   get ordenesFiltradas(): Orden[] {
-    const relevantes = ['Aprobado', 'En tránsito', 'Entregado', 'Cancelado'];
-    const base = this.ordenes.filter(o => relevantes.includes(o.estadoActual ?? ''));
-    if (this.filtroActivo === 'todos') return base;
-    return base.filter(o => o.estadoActual === this.filtroActivo);
+    const relevantes = new Set(['Aprobado', 'En tránsito', 'Entregado', 'Cancelado']);
+    const base = this.ordenes.filter(o => relevantes.has(o.estadoActual ?? ''));
+    return this.filtroActivo === 'todos' ? base : base.filter(o => o.estadoActual === this.filtroActivo);
   }
 
   constructor(
-    private ordenService: OrdenService,
-    private estadoOrdenService: EstadoOrdenService,
-    private authService: AuthService,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef,
+    private readonly ordenService: OrdenService,
+    private readonly estadoOrdenService: EstadoOrdenService,
+    private readonly authService: AuthService,
+    private readonly toast: ToastService,
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -86,9 +73,7 @@ export class EnviosComponent implements OnInit {
     });
   }
 
-  setFiltro(f: typeof this.filtroActivo): void {
-    this.filtroActivo = f;
-  }
+  setFiltro(f: typeof this.filtroActivo): void { this.filtroActivo = f; }
 
   abrirModal(o: Orden): void {
     this.ordenSeleccionada = o;
@@ -118,6 +103,48 @@ export class EnviosComponent implements OnInit {
     });
   }
 
+  tomarOrden(o: Orden): void {
+    this.ordenService.tomarOrden(o.id).subscribe({
+      next: () => this.toast.success('Ruta tomada', `Has tomado la orden #${o.id}`),
+      error: () => this.toast.error('No disponible', 'Esta ruta ya fue tomada por otro transportista'),
+    });
+  }
+
+  liberarOrden(o: Orden): void {
+    this.ordenService.liberarOrden(o.id).subscribe({
+      next: () => this.toast.success('Ruta liberada', `Has liberado la orden #${o.id}`),
+      error: () => this.toast.error('Error', 'No puedes liberar esta orden'),
+    });
+  }
+
+  /** Transportista: puede tomar si la orden no está tomada */
+  puedeTomar(o: Orden): boolean {
+    return this.esTransportista && !o.tomada;
+  }
+
+  /** Transportista: puede liberar solo la orden que él tomó (backend le devuelve su transportistaId) */
+  puedeLiberar(o: Orden): boolean {
+    return this.esTransportista && !!o.tomada && o.transportistaId === this.miUserId;
+  }
+
+  /** Orden tomada por otro transportista (el actual no puede tomarla ni liberarla) */
+  tomadaPorOtro(o: Orden): boolean {
+    return this.esTransportista && !!o.tomada && o.transportistaId !== this.miUserId;
+  }
+
+  /** Admin/bodeguero pueden actualizar estado si la orden no está finalizada */
+  puedeActualizarEstado(o: Orden): boolean {
+    return (this.esAdmin || this.esBodeguero) &&
+           o.estadoActual !== 'Entregado' && o.estadoActual !== 'Cancelado';
+  }
+
+  /** Transportista solo puede actualizar el estado de la orden que tomó */
+  puedeActualizarComoTransportista(o: Orden): boolean {
+    return this.esTransportista && !!o.tomada &&
+           o.transportistaId === this.miUserId &&
+           o.estadoActual !== 'Entregado' && o.estadoActual !== 'Cancelado';
+  }
+
   getEstadoBadge(estado?: string): string {
     const map: Record<string, string> = {
       'Aprobado':    'bg-indigo-100 text-indigo-800',
@@ -140,10 +167,10 @@ export class EnviosComponent implements OnInit {
 
   formatDate(iso?: string): string {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(iso).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
   formatCurrency(v: number): string {
-    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v ?? 0);
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(v ?? 0);
   }
 }
