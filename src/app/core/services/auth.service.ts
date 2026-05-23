@@ -130,7 +130,7 @@ export class AuthService {
 
   registrar(dto: import('../../shared/models/models').UsuarioRequest): Observable<unknown> {
     return this.http.post(`${environment.services.registro}`, dto).pipe(
-      catchError(() => of({ id: `uuid-${Date.now()}`, ...dto, activo: true })),
+      catchError(err => throwError(() => err)),
     );
   }
 

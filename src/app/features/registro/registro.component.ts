@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,14 +20,14 @@ export class RegistroComponent {
   form: FormGroup;
   loading = false;
   error = '';
-  exitoso = false;
   showPassword = false;
   showConfirm = false;
 
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
+    private readonly fb: FormBuilder,
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
       nombre:         ['', [Validators.required, Validators.minLength(2)]],
@@ -46,12 +46,20 @@ export class RegistroComponent {
     const { confirmarClave, ...dto } = this.form.value;
     this.authService.registrar(dto).subscribe({
       next: () => {
-        this.exitoso = true;
-        this.loading = false;
+        // Auto-login inmediato con las mismas credenciales
+        this.authService.login({ correo: dto.correo, clave: dto.clave }).subscribe({
+          next: () => this.router.navigate(['/dashboard']),
+          error: () => {
+            // Registro OK pero login falló — llevar al login manual
+            this.loading = false;
+            this.router.navigate(['/login']);
+          },
+        });
       },
       error: () => {
         this.error = 'No se pudo completar el registro. Intenta nuevamente.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
