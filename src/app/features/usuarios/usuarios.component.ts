@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsuarioService, RolService } from './usuario.service';
-import { Usuario, UsuarioRequest, Rol } from '../../shared/models/models';
+import { Usuario, Rol } from '../../shared/models/models';
 
 @Component({
   selector: 'app-usuarios',
@@ -32,32 +32,36 @@ export class UsuariosComponent implements OnInit {
     this.usuarioService.getAll().subscribe();
     this.rolService.getAll().subscribe();
     this.usuarioService.usuarios$.subscribe(u => { this.usuarios = u; this.cdr.markForCheck(); });
-    this.rolService.roles$.subscribe(r => { this.roles = r; this.cdr.markForCheck(); });
+    this.rolService.roles$.subscribe(r => { this.roles = r.filter(r => r.nombre !== 'admin'); this.cdr.markForCheck(); });
   }
 
   initForm(u?: Usuario): void {
     this.form = this.fb.group({
-      nombre:    [u?.nombre    ?? '', [Validators.required, Validators.minLength(2)]],
-      apellido:  [u?.apellido  ?? ''],
-      correo:    [u?.correo    ?? '', [Validators.required, Validators.email]],
-      rut:       [u?.rut       ?? ''],
-      cargo:     [u?.cargo     ?? ''],
-      rolNombre: [u?.rolNombre ?? '', Validators.required],
+      rolNombre: [u?.rolNombre ?? this.sugerirRol(u?.correo ?? ''), Validators.required],
     });
   }
 
-  openNew():            void { this.editando = null; this.initForm(); this.showModal = true; }
-  openEdit(u: Usuario): void { this.editando = u; this.initForm(u); this.showModal = true; }
-  closeModal():         void { this.showModal = false; this.editando = null; }
+  sugerirRol(correo: string): string {
+    const c = correo.toLowerCase();
+    if (c.includes('smartlogixb') || c.includes('bodeguero')) return 'bodeguero';
+    if (c.includes('smartlogixt') || c.includes('transportista')) return 'transportista';
+    return 'cliente';
+  }
+
+  openEdit(u: Usuario): void {
+    this.editando = u;
+    this.initForm(u);
+    this.showModal = true;
+  }
+
+  closeModal(): void { this.showModal = false; this.editando = null; }
 
   onSubmit(): void {
-    if (this.form.invalid) return;
-    const dto: UsuarioRequest = this.form.value;
-    if (this.editando) {
-      this.usuarioService.update(this.editando.id, dto).subscribe();
-    } else {
-      this.usuarioService.create(dto).subscribe();
-    }
+    if (this.form.invalid || !this.editando) return;
+    const rolNombre = this.form.value.rolNombre as string;
+    const rol = this.roles.find(r => r.nombre === rolNombre);
+    if (!rol) return;
+    this.usuarioService.asignarRol(this.editando.id, rol.id, rol.nombre).subscribe();
     this.closeModal();
   }
 

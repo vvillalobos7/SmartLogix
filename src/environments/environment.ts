@@ -7,6 +7,8 @@ export const environment = {
     recuperar:   '/auth/recuperar-clave',
     usuarios:    '/api/users',
     direcciones: '/api/direcciones',
+    regiones:    '/api/regiones',
+    comunas:     '/api/comunas',
     roles:       '/api/roles',
     productos:   '/api/productos',
     categorias:  '/api/categorias',

@@ -80,6 +80,17 @@ export class UsuarioService {
     );
   }
 
+  asignarRol(id: string, rolId: string, rolNombre: string): Observable<Usuario> {
+    return this.http.post<Usuario>(`${this.baseUrl}/${id}/asignar-rol`, { rolId, rolNombre }).pipe(
+      tap(u => this.usuariosSubject.next(this.usuariosSubject.value.map(x => x.id === id ? u : x))),
+      catchError(() => {
+        const list = this.usuariosSubject.value.map(u => u.id === id ? { ...u, rolNombre } : u);
+        this.usuariosSubject.next(list);
+        return of(list.find(u => u.id === id)!);
+      }),
+    );
+  }
+
   getInitials(nombre: string): string {
     return (nombre ?? 'U').split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
   }

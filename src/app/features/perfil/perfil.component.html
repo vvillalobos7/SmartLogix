@@ -1,0 +1,143 @@
+<div class="space-y-4 max-w-xl">
+
+  <!-- Header -->
+  <div>
+    <h2 class="text-base font-semibold text-gray-800">Mi Perfil</h2>
+    <p class="text-xs text-gray-400 mt-0.5">Gestiona tu información personal y dirección de entrega</p>
+  </div>
+
+  <!-- Tarjeta de info del usuario -->
+  @if (usuario) {
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+      <div class="w-14 h-14 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+        {{ getIniciales(usuario) }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-gray-800">{{ usuario.nombre }} {{ usuario.apellido }}</p>
+        <p class="text-xs text-gray-500">{{ usuario.correo }}</p>
+        @if (usuario.rolNombre) {
+          <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-semibold capitalize" [class]="getRolBadge(usuario.rolNombre)">
+            {{ usuario.rolNombre }}
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Dirección actual -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <h3 class="text-xs font-semibold text-gray-700">Dirección de entrega actual</h3>
+    </div>
+    @if (usuario?.direccion?.calle) {
+      <p class="text-sm text-gray-800">{{ getDireccionTexto() }}</p>
+      @if (usuario?.direccion?.codigoPostal) {
+        <p class="text-xs text-gray-400 mt-0.5">CP {{ usuario!.direccion!.codigoPostal }}</p>
+      }
+    } @else {
+      <p class="text-xs text-gray-400 italic">Sin dirección registrada — registra una para poder hacer pedidos.</p>
+    }
+  </div>
+
+  <!-- Formulario nueva dirección -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <h3 class="text-xs font-semibold text-gray-700 mb-4">
+      {{ usuario?.direccion?.calle ? 'Actualizar dirección' : 'Registrar dirección de entrega' }}
+    </h3>
+
+    @if (guardadoExitoso) {
+      <div class="mb-4 flex items-center gap-2 px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg text-xs text-green-800">
+        <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Dirección guardada correctamente.
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Región -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Región *</label>
+          <select formControlName="regionId" (change)="onRegionChange()"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <option value="">Seleccionar...</option>
+            @for (r of regiones; track r.id) {
+              <option [value]="r.id">{{ r.nombre }}</option>
+            }
+          </select>
+          @if (form.get('regionId')?.invalid && form.get('regionId')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Región requerida.</p>
+          }
+        </div>
+
+        <!-- Comuna -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Comuna *</label>
+          <select formControlName="comunaId"
+            [disabled]="comunas.length === 0"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 disabled:opacity-50">
+            <option value="">Seleccionar...</option>
+            @for (c of comunas; track c.id) {
+              <option [value]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+          @if (form.get('comunaId')?.invalid && form.get('comunaId')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Comuna requerida.</p>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Calle -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Calle *</label>
+          <input formControlName="calle" type="text" placeholder="Ej: Av. Providencia"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          @if (form.get('calle')?.invalid && form.get('calle')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Calle requerida.</p>
+          }
+        </div>
+
+        <!-- Número -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Número *</label>
+          <input formControlName="numero" type="text" placeholder="Ej: 1234"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          @if (form.get('numero')?.invalid && form.get('numero')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Número requerido.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Código Postal -->
+      <div class="w-1/2">
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Código postal <span class="font-normal text-gray-400">(opcional)</span></label>
+        <input formControlName="codigoPostal" type="text" placeholder="Ej: 7500000"
+          class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button type="submit" [disabled]="form.invalid || guardando"
+          class="flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg transition-colors">
+          @if (guardando) {
+            <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Guardando...
+          } @else {
+            Guardar dirección
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>

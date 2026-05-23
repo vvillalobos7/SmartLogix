@@ -27,13 +27,23 @@ export interface UsuarioSesion {
 
 // --- USUARIOS ---
 
+export interface Region {
+  id: string;
+  nombre: string;
+}
+
+export interface Comuna {
+  id: string;
+  nombre: string;
+  region?: Region;
+}
+
 export interface DireccionModel {
   id?: string;
   calle?: string;
-  ciudad?: string;
-  region?: string;
-  pais?: string;
+  numero?: string;
   codigoPostal?: string;
+  comuna?: { id?: string; nombre?: string; region?: { id?: string; nombre?: string } };
 }
 
 export interface Usuario {
@@ -166,6 +176,10 @@ export interface Producto {
   estadoNombre?: string;
   activo?: boolean;
   imagenUrl?: string;
+  idBodega?: number;
+  idPasillo?: number;
+  idEstante?: number;
+  pais?: string;
   fechaCreacion?: string;
   fechaActualizacion?: string;
 }
@@ -177,7 +191,10 @@ export interface ProductoRequest {
   stock: number;
   categoriaId: string;
   estadoNombre?: string;
-  imagenUrl?: string;
+  idBodega?: number;
+  idPasillo?: number;
+  idEstante?: number;
+  pais?: string;
 }
 
 // --- ÓRDENES ---
@@ -211,7 +228,7 @@ export interface Orden {
 }
 
 export interface OrdenRequest {
-  direccionId: string;
+  direccionId?: string;
   userNombre?: string;
   detalles: OrdenDetalle[];
 }

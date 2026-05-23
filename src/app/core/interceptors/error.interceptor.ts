@@ -32,7 +32,15 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           break;
 
         case 403:
-          toast.error('Sin permiso', 'No tienes autorización para realizar esta acción.');
+          if (authService.isMockSession()) {
+            toast.warning(
+              'Modo sin conexión',
+              'Sesión local activa — cierra sesión e ingresa nuevamente con el servidor corriendo para guardar cambios.',
+            );
+          } else if (isWrite) {
+            toast.error('Sin permiso', 'No tienes autorización para realizar esta acción.');
+          }
+          // GET con 403: silencioso — el componente maneja el null con catchError
           break;
 
         case 404:

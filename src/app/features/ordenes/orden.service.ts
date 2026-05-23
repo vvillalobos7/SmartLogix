@@ -121,7 +121,10 @@ export class OrdenService {
   getMisOrdenes(): Observable<Orden[]> {
     return this.http.get<Orden[]>(`${this.baseUrl}/mis-ordenes`).pipe(
       tap(data => this.ordenesSubject.next(data.map(o => this.normalizeOrden(o)))),
-      catchError(() => of(this.mockOrdenes)),
+      catchError(() => {
+        this.ordenesSubject.next([]);
+        return of([]);
+      }),
     );
   }
 

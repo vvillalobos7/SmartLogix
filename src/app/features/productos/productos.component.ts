@@ -2,7 +2,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductoService } from './producto.service';
-import { Producto, ProductoRequest, Categoria } from '../../shared/models/models';
+import { InventarioService } from '../inventario/inventario.service';
+import { Producto, ProductoRequest, Categoria, Bodega, Pasillo, Estante } from '../../shared/models/models';
 
 @Component({
   selector: 'app-productos',
@@ -14,6 +15,8 @@ export class ProductosComponent implements OnInit {
   productos: Producto[] = [];
   categorias: Categoria[] = [];
   filtro = '';
+  filtroPais = '';
+  filtroBodegaId: number | null = null;
   showModal = false;
   editando: Producto | null = null;
   form!: FormGroup;
@@ -25,22 +28,45 @@ export class ProductosComponent implements OnInit {
   showImagenModal = false;
   subiendoImagen = false;
 
-  get productosFiltrados(): Producto[] {
-    const q = this.filtro.toLowerCase();
-    return this.productos.filter(p =>
-      !q || p.nombre.toLowerCase().includes(q) || (p.categoriaNombre ?? '').toLowerCase().includes(q),
-    );
+  // Ubicación
+  bodegas: Bodega[] = [];
+  allPasillos: Pasillo[] = [];
+  allEstantes: Estante[] = [];
+  pasillosFiltrados: Pasillo[] = [];
+  estantesFiltrados: Estante[] = [];
+
+  get paisesList(): string[] {
+    return [...new Set(this.productos.map(p => p.pais ?? 'Chile').filter(Boolean))].sort();
   }
 
-  constructor(private productoService: ProductoService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+  get productosFiltrados(): Producto[] {
+    const q = this.filtro.toLowerCase();
+    return this.productos.filter(p => {
+      if (q && !p.nombre.toLowerCase().includes(q) && !(p.categoriaNombre ?? '').toLowerCase().includes(q)) return false;
+      if (this.filtroPais && (p.pais ?? 'Chile') !== this.filtroPais) return false;
+      if (this.filtroBodegaId && p.idBodega !== +this.filtroBodegaId) return false;
+      return true;
+    });
+  }
+
+  constructor(
+    private productoService: ProductoService,
+    private inventarioService: InventarioService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.productoService.getCategorias().subscribe(c => { this.categorias = c; this.cdr.markForCheck(); });
     this.productoService.getAll().subscribe();
-    this.productoService.productos$.subscribe(p => {
-      this.productos = p;
-      this.cdr.markForCheck();
-    });
+    this.productoService.productos$.subscribe(p => { this.productos = p; this.cdr.markForCheck(); });
+
+    this.inventarioService.getBodegas().subscribe();
+    this.inventarioService.getPasillos().subscribe();
+    this.inventarioService.getEstantes().subscribe();
+    this.inventarioService.bodegas$.subscribe(b => { this.bodegas = b; });
+    this.inventarioService.pasillos$.subscribe(p => { this.allPasillos = p; });
+    this.inventarioService.estantes$.subscribe(e => { this.allEstantes = e; });
   }
 
   initForm(p?: Producto): void {
@@ -50,21 +76,100 @@ export class ProductosComponent implements OnInit {
       precio:      [p?.precio ?? '',       [Validators.required, Validators.min(1)]],
       stock:       [p?.stock ?? 0,        [Validators.required, Validators.min(0)]],
       categoriaId: [p?.categoriaId ?? '', [Validators.required]],
-      imagenUrl:   [p?.imagenUrl ?? '',   []],
+      pais:        [p?.pais ?? 'Chile'],
+      idBodega:    [p?.idBodega ?? null],
+      idPasillo:   [p?.idPasillo ?? null],
+      idEstante:   [p?.idEstante ?? null],
     });
   }
 
-  openNew(): void              { this.editando = null; this.initForm();  this.showModal = true; }
-  openEdit(p: Producto): void  { this.editando = p;    this.initForm(p); this.showModal = true; }
-  closeModal(): void           { this.showModal = false; this.editando = null; }
+  openNew(): void {
+    this.editando = null;
+    this.pasillosFiltrados = [];
+    this.estantesFiltrados = [];
+    this.imagenFile = null;
+    this.imagenPreview = null;
+    this.initForm();
+    this.showModal = true;
+  }
+
+  openEdit(p: Producto): void {
+    this.editando = p;
+    this.pasillosFiltrados = [];
+    this.estantesFiltrados = [];
+    this.imagenFile = null;
+    this.imagenPreview = p.imagenUrl ?? null;
+    this.initForm(p);
+    this.showModal = true;
+    if (p.idBodega) {
+      this.inventarioService.getPasillosByBodega(p.idBodega).subscribe(pasillos => {
+        this.pasillosFiltrados = pasillos;
+        this.cdr.markForCheck();
+      });
+    }
+    if (p.idPasillo) {
+      this.inventarioService.getEstantesByPasillo(p.idPasillo).subscribe(estantes => {
+        this.estantesFiltrados = estantes;
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.editando = null;
+    this.imagenFile = null;
+    this.imagenPreview = null;
+  }
+
+  onBodegaChange(): void {
+    const bodegaId = this.form.get('idBodega')?.value;
+    this.form.patchValue({ idPasillo: null, idEstante: null });
+    this.pasillosFiltrados = [];
+    this.estantesFiltrados = [];
+    if (bodegaId) {
+      this.inventarioService.getPasillosByBodega(+bodegaId).subscribe(pasillos => {
+        this.pasillosFiltrados = pasillos;
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  onPasilloChange(): void {
+    const pasilloId = this.form.get('idPasillo')?.value;
+    this.form.patchValue({ idEstante: null });
+    this.estantesFiltrados = [];
+    if (pasilloId) {
+      this.inventarioService.getEstantesByPasillo(+pasilloId).subscribe(estantes => {
+        this.estantesFiltrados = estantes;
+        this.cdr.markForCheck();
+      });
+    }
+  }
 
   onSubmit(): void {
     if (this.form.invalid) return;
-    const { imagenUrl, ...dto } = this.form.value as ProductoRequest & { imagenUrl?: string };
+    const v = this.form.value;
+    const dto: ProductoRequest = {
+      nombre:      v.nombre,
+      descripcion: v.descripcion,
+      precio:      +v.precio,
+      stock:       +v.stock,
+      categoriaId: v.categoriaId,
+      pais:        v.pais || 'Chile',
+      idBodega:    v.idBodega  ? +v.idBodega  : undefined,
+      idPasillo:   v.idPasillo ? +v.idPasillo : undefined,
+      idEstante:   v.idEstante ? +v.idEstante : undefined,
+    };
+    const file = this.imagenFile;
     if (this.editando) {
-      this.productoService.update(this.editando.id, dto as ProductoRequest).subscribe();
+      this.productoService.update(this.editando.id, dto).subscribe(updated => {
+        if (file) this.productoService.subirImagen(updated.id, file).subscribe();
+      });
     } else {
-      this.productoService.create(dto as ProductoRequest).subscribe();
+      this.productoService.create(dto).subscribe(created => {
+        if (file) this.productoService.subirImagen(created.id, file).subscribe();
+      });
     }
     this.closeModal();
   }
@@ -76,6 +181,14 @@ export class ProductosComponent implements OnInit {
 
   toggleActivo(p: Producto): void {
     this.productoService.toggleActivo(p.id).subscribe();
+  }
+
+  getUbicacion(p: Producto): string {
+    if (!p.idBodega) return '—';
+    const bodega  = this.bodegas.find(b => b.idBodega === p.idBodega)?.nombre ?? `B${p.idBodega}`;
+    const pasillo = p.idPasillo ? (this.allPasillos.find(pa => pa.idPasillo === p.idPasillo)?.codigo ?? `P${p.idPasillo}`) : null;
+    const estante = p.idEstante ? (this.allEstantes.find(e => e.idEstante === p.idEstante)?.codigo ?? `E${p.idEstante}`) : null;
+    return [bodega, pasillo, estante].filter(Boolean).join(' › ');
   }
 
   // Imagen
@@ -98,20 +211,11 @@ export class ProductosComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      alert('Solo se permiten archivos de imagen.');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('La imagen no puede superar 5 MB.');
-      return;
-    }
+    if (!file.type.startsWith('image/')) { alert('Solo se permiten archivos de imagen.'); return; }
+    if (file.size > 5 * 1024 * 1024) { alert('La imagen no puede superar 5 MB.'); return; }
     this.imagenFile = file;
     const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imagenPreview = e.target?.result as string;
-      this.cdr.markForCheck();
-    };
+    reader.onload = (e) => { this.imagenPreview = e.target?.result as string; this.cdr.markForCheck(); };
     reader.readAsDataURL(file);
   }
 

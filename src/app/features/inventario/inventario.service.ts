@@ -188,7 +188,7 @@ export class InventarioService {
   }
 
   getEstantesByPasillo(pasilloId: number): Observable<Estante[]> {
-    return this.http.get<Estante[]>(`${this.urlEstantes}/pasillo/${pasilloId}`).pipe(
+    return this.http.get<Estante[]>(`${this.urlEstantes}/por-pasillo/${pasilloId}`).pipe(
       catchError(() => of(this.mockEstantes.filter(e => e.idPasillo === pasilloId))),
     );
   }

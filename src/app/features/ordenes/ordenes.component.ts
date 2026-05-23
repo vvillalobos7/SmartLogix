@@ -1,14 +1,20 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 import { OrdenService } from './orden.service';
 import { EstadoOrdenService } from './estado.service';
-import { Orden, HistorialEntry, HistorialRequest, Estado } from '../../shared/models/models';
+import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
+import { ProductoService } from '../productos/producto.service';
+import { environment } from '../../../environments/environment';
+import { Orden, HistorialEntry, HistorialRequest, Estado, Producto, OrdenRequest } from '../../shared/models/models';
 
 @Component({
   selector: 'app-ordenes',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './ordenes.component.html',
 })
 export class OrdenesComponent implements OnInit {
@@ -34,11 +40,35 @@ export class OrdenesComponent implements OnInit {
     return this.ordenes.filter(o => o.estadoActual === estado).length;
   }
 
+  // Nuevo pedido
+  showNuevoPedido = false;
+  productosDisponibles: Producto[] = [];
+  carrito: { producto: Producto; cantidad: number }[] = [];
+  procesandoOrden = false;
+  direccionId: string | null = null;
+  paisModal = '';
+
+  get paisesDisponibles(): string[] {
+    return [...new Set(this.productosDisponibles.map(p => p.pais ?? 'Chile').filter(Boolean))].sort();
+  }
+
+  get productosModalFiltrados(): Producto[] {
+    return this.paisModal
+      ? this.productosDisponibles.filter(p => (p.pais ?? 'Chile') === this.paisModal)
+      : this.productosDisponibles;
+  }
+
+  get esCliente(): boolean { return this.authService.hasRole('cliente'); }
+
   constructor(
     private ordenService: OrdenService,
     private estadoOrdenService: EstadoOrdenService,
+    private authService: AuthService,
+    private toast: ToastService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
+    private http: HttpClient,
+    private productoService: ProductoService,
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +76,11 @@ export class OrdenesComponent implements OnInit {
     this.estadoOrdenService.getAll().subscribe(data => {
       this.estadosDisponibles = data;
     });
-    this.ordenService.getAll().subscribe();
+    if (this.esCliente) {
+      this.ordenService.getMisOrdenes().subscribe();
+    } else {
+      this.ordenService.getAll().subscribe();
+    }
     this.ordenService.ordenes$.subscribe(o => {
       this.ordenes = o;
       this.cdr.markForCheck();
@@ -116,5 +150,123 @@ export class OrdenesComponent implements OnInit {
 
   getHistorial(o: Orden): HistorialEntry[] {
     return o.historial ?? [];
+  }
+
+  cancelarOrden(o: Orden): void {
+    if (!confirm('¿Cancelar esta orden? Esta acción no se puede deshacer.')) return;
+    const estado = this.estadosDisponibles.find(e => e.nombre.toLowerCase() === 'cancelado');
+    const dto: HistorialRequest = {
+      estadoId:    estado?.id ?? 'cancelado',
+      estadoNombre: 'Cancelado',
+      comentario:  'Cancelado por el cliente',
+    };
+    this.ordenService.agregarHistorial(o.id, dto).subscribe();
+  }
+
+  confirmarEntrega(o: Orden): void {
+    if (!confirm('¿Confirmar que recibiste este pedido?')) return;
+    const estado = this.estadosDisponibles.find(e => e.nombre.toLowerCase() === 'entregado');
+    const dto: HistorialRequest = {
+      estadoId:    estado?.id ?? 'entregado',
+      estadoNombre: 'Entregado',
+      comentario:  'Entrega confirmada por el cliente',
+    };
+    this.ordenService.agregarHistorial(o.id, dto).subscribe();
+  }
+
+  puedeCanCelar(o: Orden): boolean {
+    return this.esCliente && ['Pendiente', 'Procesando'].includes(o.estadoActual ?? '');
+  }
+
+  puedeConfirmar(o: Orden): boolean {
+    return this.esCliente && o.estadoActual === 'En tránsito';
+  }
+
+  // ── Nuevo Pedido ──────────────────────────────────────────────────────────
+
+  abrirNuevoPedido(): void {
+    this.carrito = [];
+    this.showNuevoPedido = true;
+    // Usa /me (accesible a todos los roles) para evitar 403 del endpoint de admin
+    this.http.get<any>(`${environment.services.usuarios}/me`).pipe(
+      catchError(() => of(null)),
+    ).subscribe(user => {
+      this.direccionId = user?.direccion?.id ?? null;
+      this.cdr.markForCheck();
+    });
+    this.productoService.getAll().subscribe(productos => {
+      this.productosDisponibles = productos.filter(p => p.activo !== false && (p.stock ?? 0) > 0);
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarNuevoPedido(): void {
+    this.showNuevoPedido = false;
+    this.carrito = [];
+    this.paisModal = '';
+  }
+
+  getCantidad(productoId: string): number {
+    return this.carrito.find(c => c.producto.id === productoId)?.cantidad ?? 0;
+  }
+
+  agregarAlCarrito(p: Producto): void {
+    const item = this.carrito.find(c => c.producto.id === p.id);
+    if (item) {
+      if (item.cantidad < (p.stock ?? 999)) item.cantidad++;
+    } else {
+      this.carrito = [...this.carrito, { producto: p, cantidad: 1 }];
+    }
+  }
+
+  quitarDelCarrito(p: Producto): void {
+    const idx = this.carrito.findIndex(c => c.producto.id === p.id);
+    if (idx === -1) return;
+    if (this.carrito[idx].cantidad > 1) {
+      const updated = [...this.carrito];
+      updated[idx] = { ...updated[idx], cantidad: updated[idx].cantidad - 1 };
+      this.carrito = updated;
+    } else {
+      this.carrito = this.carrito.filter(c => c.producto.id !== p.id);
+    }
+  }
+
+  totalCarrito(): number {
+    return this.carrito.reduce((sum, c) => sum + (c.producto.precio * c.cantidad), 0);
+  }
+
+  totalItems(): number {
+    return this.carrito.reduce((sum, c) => sum + c.cantidad, 0);
+  }
+
+  confirmarPedido(): void {
+    if (this.carrito.length === 0 || this.procesandoOrden) return;
+    if (!this.direccionId) {
+      this.toast.error(
+        'Sin dirección registrada',
+        'Debes registrar una dirección de entrega en tu perfil antes de hacer un pedido.',
+      );
+      return;
+    }
+    this.procesandoOrden = true;
+    const user = this.authService.getCurrentUser()!;
+    const dto: OrdenRequest = {
+      direccionId: this.direccionId,
+      userNombre: user.correo,
+      detalles: this.carrito.map(c => ({
+        productoId: c.producto.id,
+        cantidad: c.cantidad,
+        productoNombre: c.producto.nombre,
+        precioUnitario: c.producto.precio,
+      })),
+    };
+    this.ordenService.crearOrden(dto).subscribe({
+      next: () => {
+        this.procesandoOrden = false;
+        this.cerrarNuevoPedido();
+        this.ordenService.getMisOrdenes().subscribe();
+      },
+      error: () => { this.procesandoOrden = false; },
+    });
   }
 }
