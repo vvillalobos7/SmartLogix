@@ -251,6 +251,7 @@ export class OrdenesComponent implements OnInit {
     }
     this.procesandoOrden = true;
     const user = this.authService.getCurrentUser();
+    if (!user) { this.procesandoOrden = false; return; }
     const dto: OrdenRequest = {
       direccionId: this.direccionId,
       userNombre: user.correo,
