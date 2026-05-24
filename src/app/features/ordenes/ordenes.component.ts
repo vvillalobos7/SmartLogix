@@ -180,7 +180,7 @@ export class OrdenesComponent implements OnInit {
   }
 
   puedeConfirmar(o: Orden): boolean {
-    return this.esCliente && o.estadoActual === 'En tránsito';
+    return this.esCliente && o.estadoActual === 'Entregado';
   }
 
   // â”€â”€ Nuevo Pedido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
