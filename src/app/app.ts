@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { OrdenService } from './features/ordenes/orden.service';
 import { ProductoService } from './features/productos/producto.service';
+import { ThemeService, AppTheme } from './core/services/theme.service';
 import { UsuarioSesion } from './shared/models/models';
 import { combineLatest, Subscription } from 'rxjs';
 import { ToastComponent } from './shared/components/toast/toast.component';
@@ -31,7 +32,8 @@ interface Notificacion {
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'SmartLogix';
-  showNotifPanel = false;
+  showNotifPanel  = false;
+  showThemePicker = false;
   notificacionesList: Notificacion[] = [];
   private notifSub!: Subscription;
 
@@ -75,6 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
+    public themeService: ThemeService,
     private ordenService: OrdenService,
     private productoService: ProductoService,
   ) {}
@@ -126,13 +129,29 @@ export class AppComponent implements OnInit, OnDestroy {
 
   get notificaciones(): number { return this.notificacionesList.length; }
 
-  toggleNotifPanel(): void { this.showNotifPanel = !this.showNotifPanel; }
+  toggleNotifPanel(): void {
+    this.showNotifPanel = !this.showNotifPanel;
+    if (this.showNotifPanel) this.showThemePicker = false;
+  }
+
+  toggleThemePicker(): void {
+    this.showThemePicker = !this.showThemePicker;
+    if (this.showThemePicker) this.showNotifPanel = false;
+  }
+
+  selectTheme(theme: AppTheme): void {
+    this.themeService.apply(theme);
+    this.showThemePicker = false;
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const t = event.target as HTMLElement;
     if (!t.closest('#notif-btn') && !t.closest('#notif-panel')) {
       this.showNotifPanel = false;
+    }
+    if (!t.closest('#theme-btn') && !t.closest('#theme-panel')) {
+      this.showThemePicker = false;
     }
   }
 

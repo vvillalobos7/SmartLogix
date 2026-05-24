@@ -1,6 +1,32 @@
 /* Global SmartLogix styles */
 @import 'tailwindcss';
 
+/* ── Sidebar nav items ───────────────────────────────────────────── */
+.nav-item:hover {
+  background-color: rgba(255,255,255,0.12);
+}
+
+.nav-item-active {
+  background-color: rgba(255,255,255,0.18) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.nav-item-active svg {
+  opacity: 1;
+}
+
+/* ── Smooth theme transitions ────────────────────────────────────── */
+aside, .nav-item, header {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* ── Ring helper para el selector de tema ───────────────────────── */
+button[style*="--tw-ring-color"] {
+  outline: 2px solid var(--tw-ring-color);
+  outline-offset: 2px;
+}
+
 * {
   box-sizing: border-box;
 }
