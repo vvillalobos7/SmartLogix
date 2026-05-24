@@ -192,7 +192,8 @@ export class OrdenesComponent implements OnInit {
   }
 
   puedeConfirmar(o: Orden): boolean {
-    return this.esCliente && o.estadoActual === 'Entregado';
+    if (!this.esCliente || o.estadoActual !== 'Entregado') return false;
+    return !(o.historial ?? []).some(h => h.comentario === 'Entrega confirmada por el cliente');
   }
 
   // â”€â”€ Nuevo Pedido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
