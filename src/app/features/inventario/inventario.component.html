@@ -6,307 +6,191 @@
       <h2 class="text-base font-semibold text-gray-800">Inventario</h2>
       <p class="text-xs text-gray-400 mt-0.5">Bodegas · Pasillos · Estantes</p>
     </div>
-    <div class="flex items-center gap-2">
-      @if (activeTab === 'bodegas') {
-        <button (click)="openNewBodega()"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          Nueva Bodega
-        </button>
-      }
-      @if (activeTab === 'pasillos') {
-        <button (click)="openNewPasillo()"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          Nuevo Pasillo
-        </button>
-      }
-      @if (activeTab === 'estantes') {
-        <button (click)="openNewEstante()"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          Nuevo Estante
-        </button>
-      }
-      @if (activeTab === 'estpasi') {
-        <button (click)="openNewEstPasi()"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-          Nueva Asignación
-        </button>
-      }
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
-    <button (click)="activeTab = 'bodegas'"
-      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
-      [class]="activeTab === 'bodegas' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-      Bodegas ({{ bodegas.length }})
-    </button>
-    <button (click)="activeTab = 'pasillos'"
-      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
-      [class]="activeTab === 'pasillos' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-      Pasillos ({{ pasillos.length }})
-    </button>
-    <button (click)="activeTab = 'estantes'"
-      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
-      [class]="activeTab === 'estantes' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-      Estantes ({{ estantes.length }})
-    </button>
-    <button (click)="activeTab = 'estpasi'"
-      class="px-4 py-1.5 text-xs font-semibold rounded-md transition-colors"
-      [class]="activeTab === 'estpasi' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-      Est-Pasi ({{ estPasiList.length }})
+    <button (click)="openNewBodega()"
+      class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Nueva Bodega
     </button>
   </div>
 
-  <!-- BODEGAS TABLE -->
-  @if (activeTab === 'bodegas') {
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nombre</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ciudad</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Capacidad</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Pasillos</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
-              <th class="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (b of bodegas; track b.idBodega) {
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ b.idBodega }}</td>
-                <td class="px-4 py-3">
-                  <div class="text-xs font-medium text-gray-800">{{ b.nombre }}</div>
-                  <div class="text-xs text-gray-400">{{ b.direccion }}</div>
-                </td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ b.ciudad }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ b.capacidadTotal ?? '—' }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ b.totalPasillos ?? getPasillosDeBodega(b.idBodega!).length }}</td>
-                <td class="px-4 py-3 text-center">
-                  @if (b.activa) {
-                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activa</span>
-                  } @else {
-                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactiva</span>
-                  }
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center justify-end gap-1.5">
-                    <button (click)="toggleBodega(b)"
-                      class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-                      [title]="b.activa ? 'Desactivar' : 'Activar'">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+  <!-- Árbol jerárquico -->
+  <div class="space-y-3">
+    @for (b of bodegas; track b.idBodega) {
+      <div class="bg-white rounded-xl border shadow-sm overflow-hidden"
+        [class]="b.activa !== false ? 'border-gray-200' : 'border-gray-100 opacity-70'">
+
+        <!-- ── Cabecera Bodega ── -->
+        <div class="flex items-center justify-between px-4 py-3 bg-white">
+          <div class="flex items-center gap-3 min-w-0">
+            <button (click)="toggleBodegaExpand(b.idBodega!)"
+              class="p-1 rounded hover:bg-gray-100 transition-colors text-gray-400 flex-shrink-0">
+              <svg class="w-4 h-4 transition-transform duration-200"
+                [class]="isBodegaExpanded(b.idBodega!) ? 'rotate-90' : ''"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+            <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-gray-800 truncate">{{ b.nombre }}</p>
+              <p class="text-xs text-gray-400">
+                {{ b.ciudad }}{{ b.pais ? ' · ' + b.pais : '' }}
+                · {{ getPasillosDeBodega(b.idBodega!).length }} pasillo(s)
+              </p>
+            </div>
+            @if (b.activa !== false) {
+              <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-semibold flex-shrink-0">Activa</span>
+            } @else {
+              <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-semibold flex-shrink-0">Inactiva</span>
+            }
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0 ml-3">
+            <button (click)="openNewPasillo(b.idBodega!)"
+              class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Pasillo
+            </button>
+            <button (click)="toggleBodega(b)"
+              class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+              [title]="b.activa !== false ? 'Desactivar' : 'Activar'">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+              </svg>
+            </button>
+            <button (click)="deleteBodega(b.idBodega!)"
+              class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Contenido expandido: Pasillos ── -->
+        @if (isBodegaExpanded(b.idBodega!)) {
+          <div class="border-t border-gray-100 bg-gray-50/60 px-4 py-3 space-y-2">
+            @for (p of getPasillosDeBodega(b.idBodega!); track p.idPasillo) {
+              <div class="bg-white rounded-lg border border-gray-100 overflow-hidden">
+
+                <!-- Cabecera Pasillo -->
+                <div class="flex items-center justify-between px-3 py-2.5">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <button (click)="togglePasilloExpand(p.idPasillo!)"
+                      class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 flex-shrink-0">
+                      <svg class="w-3.5 h-3.5 transition-transform duration-200"
+                        [class]="isPasilloExpanded(p.idPasillo!) ? 'rotate-90' : ''"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                       </svg>
                     </button>
-                    <button (click)="deleteBodega(b.idBodega!)"
-                      class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-6 h-6 rounded bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                      </svg>
+                    </div>
+                    <span class="text-xs font-semibold font-mono text-gray-700">{{ p.codigo }}</span>
+                    @if (p.descripcion) {
+                      <span class="text-xs text-gray-400 truncate">{{ p.descripcion }}</span>
+                    }
+                    <span class="text-xs text-gray-400">·</span>
+                    <span class="text-xs text-gray-500">{{ getEstantesEnPasillo(p.idPasillo!).length }} estante(s)</span>
+                    @if (p.activo === false) {
+                      <span class="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded font-semibold">Inactivo</span>
+                    }
+                  </div>
+                  <div class="flex items-center gap-1 flex-shrink-0 ml-2">
+                    <button (click)="openNewEstante(p.idPasillo!)"
+                      class="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                      </svg>
+                      Estante
+                    </button>
+                    <button (click)="deletePasillo(p.idPasillo!)"
+                      class="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                       </svg>
                     </button>
                   </div>
-                </td>
-              </tr>
-            }
-            @empty {
-              <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin bodegas registradas.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
+                </div>
 
-  <!-- PASILLOS TABLE -->
-  @if (activeTab === 'pasillos') {
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Código</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descripción</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Bodega</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Estantes</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
-              <th class="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (p of pasillos; track p.idPasillo) {
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ p.idPasillo }}</td>
-                <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-700">{{ p.codigo }}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ p.descripcion }}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ p.nombreBodega }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ p.totalEstantes ?? '—' }}</td>
-                <td class="px-4 py-3 text-center">
-                  @if (p.activo) {
-                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activo</span>
-                  } @else {
-                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactivo</span>
-                  }
-                </td>
-                <td class="px-4 py-3 text-right">
-                  <button (click)="deletePasillo(p.idPasillo!)"
-                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            }
-            @empty {
-              <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin pasillos registrados.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  <!-- ESTANTES TABLE -->
-  @if (activeTab === 'estantes') {
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Código</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descripción</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Niveles</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Cap. Total</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
-              <th class="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (e of estantes; track e.idEstante) {
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ e.idEstante }}</td>
-                <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-700">{{ e.codigo }}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ e.descripcion }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ e.numNiveles ?? '—' }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ e.capacidadTotal ?? '—' }}</td>
-                <td class="px-4 py-3 text-center">
-                  @if (e.activo) {
-                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Activo</span>
-                  } @else {
-                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactivo</span>
-                  }
-                </td>
-                <td class="px-4 py-3 text-right">
-                  <button (click)="deleteEstante(e.idEstante!)"
-                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            }
-            @empty {
-              <tr><td colspan="7" class="px-4 py-8 text-center text-xs text-gray-400">Sin estantes registrados.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  <!-- EST-PASI TABLE -->
-  @if (activeTab === 'estpasi') {
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Estante</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Pasillo</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Bodega</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Posición</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Fila</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Ocupación</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Estado</th>
-              <th class="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (ep of estPasiList; track ep.idEstPasi) {
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 font-mono text-xs text-gray-400">#{{ ep.idEstPasi }}</td>
-                <td class="px-4 py-3">
-                  <div class="text-xs font-semibold font-mono text-gray-700">{{ ep.codigoEstante }}</div>
-                  <div class="text-xs text-gray-400">{{ ep.descripcionEstante }}</div>
-                </td>
-                <td class="px-4 py-3">
-                  <div class="text-xs font-semibold font-mono text-gray-700">{{ ep.codigoPasillo }}</div>
-                  <div class="text-xs text-gray-400">{{ ep.descripcionPasillo }}</div>
-                </td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ ep.nombreBodega }}</td>
-                <td class="px-4 py-3 text-xs text-gray-600">{{ ep.posicion ?? '—' }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs text-gray-700">{{ ep.numeroFila ?? '—' }}</td>
-                <td class="px-4 py-3 text-right font-mono text-xs font-semibold"
-                  [class]="getOcupacionColor(ep.ocupacionPct)">
-                  {{ ep.ocupacionPct != null ? ep.ocupacionPct + '%' : '—' }}
-                </td>
-                <td class="px-4 py-3 text-center">
-                  @if (ep.habilitada) {
-                    <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">Habilitada</span>
-                  } @else {
-                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Deshabilitada</span>
-                  }
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center justify-end gap-1.5">
-                    <button (click)="openEditEstPasi(ep)"
-                      class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                      </svg>
-                    </button>
-                    <button (click)="deleteEstPasi(ep.idEstPasi!)"
-                      class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
+                <!-- Estantes del pasillo -->
+                @if (isPasilloExpanded(p.idPasillo!)) {
+                  <div class="border-t border-gray-50">
+                    @for (ep of getEstantesEnPasillo(p.idPasillo!); track ep.idEstPasi) {
+                      <div class="flex items-center justify-between pl-9 pr-3 py-1.5 border-b border-gray-50 last:border-0 hover:bg-gray-50/80 transition-colors">
+                        <div class="flex items-center gap-3 min-w-0">
+                          <div class="w-5 h-5 rounded bg-amber-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-2.5 h-2.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                            </svg>
+                          </div>
+                          <span class="text-xs font-semibold font-mono text-gray-700">{{ ep.codigoEstante }}</span>
+                          @if (ep.descripcionEstante) {
+                            <span class="text-xs text-gray-400 truncate">{{ ep.descripcionEstante }}</span>
+                          }
+                          @if (ep.numNiveles != null) {
+                            <span class="text-xs text-gray-400">{{ ep.numNiveles }} nivel(es)</span>
+                          }
+                          @if (ep.posicion) {
+                            <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ ep.posicion }}</span>
+                          }
+                          @if (ep.ocupacionPct != null) {
+                            <span class="text-xs font-semibold" [class]="getOcupacionColor(ep.ocupacionPct)">
+                              {{ ep.ocupacionPct }}%
+                            </span>
+                          }
+                          @if (ep.habilitada === false) {
+                            <span class="text-xs bg-red-50 text-red-500 px-1.5 py-0.5 rounded">Deshabilitado</span>
+                          }
+                        </div>
+                        <button (click)="deleteEstPasi(ep.idEstPasi!)" title="Quitar del pasillo"
+                          class="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      </div>
+                    }
+                    @empty {
+                      <div class="pl-9 pr-3 py-2 text-xs text-gray-400 italic">
+                        Sin estantes asignados. Usa "+ Estante" para agregar uno.
+                      </div>
+                    }
                   </div>
-                </td>
-              </tr>
+                }
+
+              </div>
             }
             @empty {
-              <tr><td colspan="9" class="px-4 py-8 text-center text-xs text-gray-400">Sin asignaciones registradas.</td></tr>
+              <div class="py-3 text-center text-xs text-gray-400 italic">
+                Sin pasillos. Usa "+ Pasillo" para agregar uno a esta bodega.
+              </div>
             }
-          </tbody>
-        </table>
+          </div>
+        }
+
       </div>
-    </div>
-  }
+    }
+    @empty {
+      <div class="bg-white rounded-xl border border-gray-100 py-12 text-center text-xs text-gray-400">
+        Sin bodegas registradas. Haz clic en "Nueva Bodega" para comenzar.
+      </div>
+    }
+  </div>
 
 </div>
 
@@ -325,32 +209,40 @@
       </div>
       <form [formGroup]="bodegaForm" (ngSubmit)="onSubmitBodega()" class="px-6 py-5 space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
-          <input formControlName="nombre" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="Bodega Norte">
+          <label for="bodega-nombre" class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
+          <input id="bodega-nombre" formControlName="nombre"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
+            placeholder="Bodega Norte">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Dirección</label>
-            <input formControlName="direccion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="bodega-direccion" class="block text-xs font-semibold text-gray-600 mb-1">Dirección</label>
+            <input id="bodega-direccion" formControlName="direccion"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Ciudad</label>
-            <input formControlName="ciudad" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="bodega-ciudad" class="block text-xs font-semibold text-gray-600 mb-1">Ciudad</label>
+            <input id="bodega-ciudad" formControlName="ciudad"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">País</label>
-            <input formControlName="pais" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="bodega-pais" class="block text-xs font-semibold text-gray-600 mb-1">País</label>
+            <input id="bodega-pais" formControlName="pais"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Capacidad total</label>
-            <input formControlName="capacidadTotal" type="number" min="0" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="bodega-capacidad" class="block text-xs font-semibold text-gray-600 mb-1">Capacidad total</label>
+            <input id="bodega-capacidad" formControlName="capacidadTotal" type="number" min="0"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
-          <button type="submit" [disabled]="bodegaForm.invalid" class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
+          <button type="button" (click)="closeModal()"
+            class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+          <button type="submit" [disabled]="bodegaForm.invalid"
+            class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
         </div>
       </form>
     </div>
@@ -373,21 +265,26 @@
       <form [formGroup]="pasilloForm" (ngSubmit)="onSubmitPasillo()" class="px-6 py-5 space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Código *</label>
-            <input formControlName="codigo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="A">
+            <label for="pasillo-codigo" class="block text-xs font-semibold text-gray-600 mb-1">Código *</label>
+            <input id="pasillo-codigo" formControlName="codigo"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
+              placeholder="A">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Orden</label>
-            <input formControlName="numeroOrden" type="number" min="1" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="pasillo-orden" class="block text-xs font-semibold text-gray-600 mb-1">Orden</label>
+            <input id="pasillo-orden" formControlName="numeroOrden" type="number" min="1"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
-          <input formControlName="descripcion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          <label for="pasillo-desc" class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+          <input id="pasillo-desc" formControlName="descripcion"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Bodega *</label>
-          <select formControlName="idBodega" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          <label for="pasillo-bodega" class="block text-xs font-semibold text-gray-600 mb-1">Bodega *</label>
+          <select id="pasillo-bodega" formControlName="idBodega"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             <option [value]="null">Seleccionar bodega...</option>
             @for (b of bodegas; track b.idBodega) {
               <option [value]="b.idBodega">{{ b.nombre }}</option>
@@ -395,8 +292,10 @@
           </select>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
-          <button type="submit" [disabled]="pasilloForm.invalid" class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
+          <button type="button" (click)="closeModal()"
+            class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+          <button type="submit" [disabled]="pasilloForm.invalid"
+            class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
         </div>
       </form>
     </div>
@@ -419,27 +318,33 @@
       <form [formGroup]="estanteForm" (ngSubmit)="onSubmitEstante()" class="px-6 py-5 space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Código *</label>
-            <input formControlName="codigo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="E1">
+            <label for="estante-codigo" class="block text-xs font-semibold text-gray-600 mb-1">Código *</label>
+            <input id="estante-codigo" formControlName="codigo"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
+              placeholder="E1">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Niveles *</label>
-            <input formControlName="numNiveles" type="number" min="1" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="estante-niveles" class="block text-xs font-semibold text-gray-600 mb-1">Niveles *</label>
+            <input id="estante-niveles" formControlName="numNiveles" type="number" min="1"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Capacidad por nivel</label>
-            <input formControlName="capacidadPorNivel" type="number" min="0" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="estante-cap" class="block text-xs font-semibold text-gray-600 mb-1">Capacidad por nivel</label>
+            <input id="estante-cap" formControlName="capacidadPorNivel" type="number" min="0"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
-            <input formControlName="descripcion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            <label for="estante-desc" class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+            <input id="estante-desc" formControlName="descripcion"
+              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Pasillo *</label>
-          <select formControlName="idPasillo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          <label for="estante-pasillo" class="block text-xs font-semibold text-gray-600 mb-1">Pasillo *</label>
+          <select id="estante-pasillo" formControlName="idPasillo"
+            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             <option [value]="null">Seleccionar pasillo...</option>
             @for (p of pasillos; track p.idPasillo) {
               <option [value]="p.idPasillo">{{ p.codigo }} — {{ p.nombreBodega }}</option>
@@ -447,87 +352,10 @@
           </select>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
-          <button type="submit" [disabled]="estanteForm.invalid" class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-<!-- ===== MODAL EST-PASI ===== -->
-@if (showModal && modalTipo === 'estpasi') {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
-    style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <div>
-          <h3 class="text-sm font-semibold text-gray-800">{{ editandoEstPasiId ? 'Editar Asignación' : 'Nueva Asignación Estante-Pasillo' }}</h3>
-          <p class="text-xs text-gray-400">Vincula un estante a un pasillo</p>
-        </div>
-        <button (click)="closeModal()" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <form [formGroup]="estPasiForm" (ngSubmit)="onSubmitEstPasi()" class="px-6 py-5 space-y-3">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Estante *</label>
-            <select formControlName="idEstante" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-              <option [value]="null">Seleccionar estante...</option>
-              @for (e of estantes; track e.idEstante) {
-                <option [value]="e.idEstante">{{ e.codigo }} — {{ e.descripcion }}</option>
-              }
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Pasillo *</label>
-            <select formControlName="idPasillo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-              <option [value]="null">Seleccionar pasillo...</option>
-              @for (p of pasillos; track p.idPasillo) {
-                <option [value]="p.idPasillo">{{ p.codigo }} — {{ p.nombreBodega }}</option>
-              }
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Posición</label>
-            <input formControlName="posicion" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" placeholder="Lado izquierdo">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">N° Fila</label>
-            <input formControlName="numeroFila" type="number" min="1" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Ocupación % <span class="font-normal text-gray-400">(0-100)</span></label>
-            <input formControlName="ocupacionPct" type="number" min="0" max="100" step="0.1"
-              class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-          </div>
-          <div class="flex items-end pb-1">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input formControlName="habilitada" type="checkbox"
-                class="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500">
-              <span class="text-xs font-semibold text-gray-600">Habilitada</span>
-            </label>
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Observaciones</label>
-          <textarea formControlName="observaciones" rows="2"
-            class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 resize-none"
-            placeholder="Notas sobre la ubicación..."></textarea>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" (click)="closeModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
-          <button type="submit" [disabled]="estPasiForm.invalid"
-            class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">
-            {{ editandoEstPasiId ? 'Actualizar' : 'Crear' }}
-          </button>
+          <button type="button" (click)="closeModal()"
+            class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+          <button type="submit" [disabled]="estanteForm.invalid"
+            class="px-4 py-2 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 disabled:opacity-60 rounded-lg">Crear</button>
         </div>
       </form>
     </div>

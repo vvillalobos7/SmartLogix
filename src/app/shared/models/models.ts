@@ -255,6 +255,7 @@ export interface Orden {
   estadoActual?: string;
   tomada?: boolean;
   transportistaId?: string;
+  transportistaNombre?: string;
   detalles?: OrdenDetalle[];
   historial?: HistorialEntry[];
   total?: number;

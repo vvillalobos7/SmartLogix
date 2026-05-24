@@ -105,21 +105,34 @@ export class EnviosComponent implements OnInit {
 
   tomarOrden(o: Orden): void {
     this.ordenService.tomarOrden(o.id).subscribe({
-      next: () => this.toast.success('Ruta tomada', `Has tomado la orden #${o.id}`),
-      error: () => this.toast.error('No disponible', 'Esta ruta ya fue tomada por otro transportista'),
+      next: () => {
+        this.toast.success('Ruta tomada', `Has tomado la orden #${o.id}`);
+      },
+      error: (err) => {
+        if (err.status === 409) {
+          this.toast.warning('Ruta no disponible', 'Esta ruta ya fue tomada por otro transportista.');
+        }
+        // Recargar siempre para reflejar el estado real de la BD
+        this.ordenService.getAll().subscribe();
+      },
     });
   }
 
   liberarOrden(o: Orden): void {
     this.ordenService.liberarOrden(o.id).subscribe({
       next: () => this.toast.success('Ruta liberada', `Has liberado la orden #${o.id}`),
-      error: () => this.toast.error('Error', 'No puedes liberar esta orden'),
+      error: (err) => {
+        if (err.status === 403 || err.status === 409) {
+          this.toast.error('Error', 'No puedes liberar esta orden.');
+        }
+        this.ordenService.getAll().subscribe();
+      },
     });
   }
 
-  /** Transportista: puede tomar si la orden no está tomada */
+  /** Transportista: puede tomar solo si la orden está Aprobada y aún no fue tomada */
   puedeTomar(o: Orden): boolean {
-    return this.esTransportista && !o.tomada;
+    return this.esTransportista && !o.tomada && o.estadoActual === 'Aprobado';
   }
 
   /** Transportista: puede liberar solo la orden que él tomó (backend le devuelve su transportistaId) */

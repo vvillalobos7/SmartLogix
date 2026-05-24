@@ -6,7 +6,7 @@ import {
   Bodega, BodegaRequest,
   Pasillo, PasilloRequest,
   Estante, EstanteRequest,
-  EstPasi, EstPasiRequest,
+  EstPasi,
 } from '../../shared/models/models';
 
 @Component({
@@ -16,26 +16,25 @@ import {
   templateUrl: './inventario.component.html',
 })
 export class InventarioComponent implements OnInit {
-  activeTab: 'bodegas' | 'pasillos' | 'estantes' | 'estpasi' = 'bodegas';
-
-  bodegas:   Bodega[]  = [];
-  pasillos:  Pasillo[] = [];
-  estantes:  Estante[] = [];
+  bodegas:     Bodega[]  = [];
+  pasillos:    Pasillo[] = [];
+  estantes:    Estante[] = [];
   estPasiList: EstPasi[] = [];
 
+  expandedBodegas  = new Set<number>();
+  expandedPasillos = new Set<number>();
+
   showModal = false;
-  modalTipo: 'bodega' | 'pasillo' | 'estante' | 'estpasi' = 'bodega';
-  editandoEstPasiId: number | null = null;
+  modalTipo: 'bodega' | 'pasillo' | 'estante' = 'bodega';
 
   bodegaForm!:  FormGroup;
   pasilloForm!: FormGroup;
   estanteForm!: FormGroup;
-  estPasiForm!: FormGroup;
 
   constructor(
-    private inventarioService: InventarioService,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef,
+    private readonly inventarioService: InventarioService,
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -45,25 +44,33 @@ export class InventarioComponent implements OnInit {
     this.inventarioService.getEstantes().subscribe();
     this.inventarioService.getEstPasi().subscribe();
 
-    this.inventarioService.bodegas$.subscribe(b   => { this.bodegas      = b;  this.cdr.detectChanges(); });
-    this.inventarioService.pasillos$.subscribe(p  => { this.pasillos     = p;  this.cdr.detectChanges(); });
+    this.inventarioService.bodegas$.subscribe(b => {
+      this.bodegas = b;
+      b.forEach(bodega => { if (bodega.idBodega != null) this.expandedBodegas.add(bodega.idBodega); });
+      this.cdr.detectChanges();
+    });
+    this.inventarioService.pasillos$.subscribe(p => {
+      this.pasillos = p;
+      p.forEach(pasillo => { if (pasillo.idPasillo != null) this.expandedPasillos.add(pasillo.idPasillo); });
+      this.cdr.detectChanges();
+    });
     this.inventarioService.estantes$.subscribe(e  => { this.estantes     = e;  this.cdr.detectChanges(); });
     this.inventarioService.estPasi$.subscribe(ep  => { this.estPasiList  = ep; this.cdr.detectChanges(); });
   }
 
   initForms(): void {
     this.bodegaForm = this.fb.group({
-      nombre:        ['', Validators.required],
-      direccion:     [''],
-      ciudad:        [''],
-      pais:          ['Chile'],
-      capacidadTotal:[0, Validators.min(0)],
+      nombre:         ['', Validators.required],
+      direccion:      [''],
+      ciudad:         [''],
+      pais:           ['Chile'],
+      capacidadTotal: [0, Validators.min(0)],
     });
     this.pasilloForm = this.fb.group({
-      codigo:       ['', Validators.required],
-      descripcion:  [''],
-      numeroOrden:  [1, Validators.min(1)],
-      idBodega:     [null, Validators.required],
+      codigo:      ['', Validators.required],
+      descripcion: [''],
+      numeroOrden: [1, Validators.min(1)],
+      idBodega:    [null, Validators.required],
     });
     this.estanteForm = this.fb.group({
       codigo:            ['', Validators.required],
@@ -72,45 +79,27 @@ export class InventarioComponent implements OnInit {
       capacidadPorNivel: [0, Validators.min(0)],
       idPasillo:         [null, Validators.required],
     });
-    this.estPasiForm = this.fb.group({
-      idEstante:   [null, Validators.required],
-      idPasillo:   [null, Validators.required],
-      posicion:    [''],
-      numeroFila:  [null],
-      ocupacionPct:[null, [Validators.min(0), Validators.max(100)]],
-      habilitada:  [true],
-      observaciones:[''],
-    });
   }
 
-  openNewBodega():   void { this.modalTipo = 'bodega';   this.bodegaForm.reset({ pais: 'Chile', capacidadTotal: 0 }); this.showModal = true; }
-  openNewPasillo():  void { this.modalTipo = 'pasillo';  this.pasilloForm.reset({ numeroOrden: 1 });                   this.showModal = true; }
-  openNewEstante():  void { this.modalTipo = 'estante';  this.estanteForm.reset({ numNiveles: 1, capacidadPorNivel: 0 }); this.showModal = true; }
-  openNewEstPasi():  void {
-    this.modalTipo = 'estpasi';
-    this.editandoEstPasiId = null;
-    this.estPasiForm.reset({ habilitada: true });
-    this.showModal = true;
-  }
-  openEditEstPasi(ep: EstPasi): void {
-    this.modalTipo = 'estpasi';
-    this.editandoEstPasiId = ep.idEstPasi ?? null;
-    this.estPasiForm.patchValue({
-      idEstante:    ep.idEstante,
-      idPasillo:    ep.idPasillo,
-      posicion:     ep.posicion ?? '',
-      numeroFila:   ep.numeroFila ?? null,
-      ocupacionPct: ep.ocupacionPct ?? null,
-      habilitada:   ep.habilitada ?? true,
-      observaciones:ep.observaciones ?? '',
-    });
+  openNewBodega(): void {
+    this.modalTipo = 'bodega';
+    this.bodegaForm.reset({ pais: 'Chile', capacidadTotal: 0 });
     this.showModal = true;
   }
 
-  closeModal(): void {
-    this.showModal = false;
-    this.editandoEstPasiId = null;
+  openNewPasillo(idBodega?: number): void {
+    this.modalTipo = 'pasillo';
+    this.pasilloForm.reset({ numeroOrden: 1, idBodega: idBodega ?? null });
+    this.showModal = true;
   }
+
+  openNewEstante(idPasillo?: number): void {
+    this.modalTipo = 'estante';
+    this.estanteForm.reset({ numNiveles: 1, capacidadPorNivel: 0, idPasillo: idPasillo ?? null });
+    this.showModal = true;
+  }
+
+  closeModal(): void { this.showModal = false; }
 
   onSubmitBodega(): void {
     if (this.bodegaForm.invalid) return;
@@ -129,8 +118,7 @@ export class InventarioComponent implements OnInit {
   onSubmitEstante(): void {
     if (this.estanteForm.invalid) return;
     const { idPasillo, ...rest } = this.estanteForm.value as { idPasillo: number } & EstanteRequest;
-    const dto: EstanteRequest = rest;
-    this.inventarioService.createEstante(dto).subscribe({
+    this.inventarioService.createEstante(rest).subscribe({
       next: created => {
         if (idPasillo && created?.idEstante) {
           this.inventarioService.createEstPasiLink(created.idEstante, idPasillo).subscribe();
@@ -141,44 +129,52 @@ export class InventarioComponent implements OnInit {
     });
   }
 
-  onSubmitEstPasi(): void {
-    if (this.estPasiForm.invalid) return;
-    const v = this.estPasiForm.value;
-    const dto: EstPasiRequest = {
-      idEstante:    +v.idEstante,
-      idPasillo:    +v.idPasillo,
-      posicion:     v.posicion || undefined,
-      numeroFila:   v.numeroFila ? +v.numeroFila : undefined,
-      ocupacionPct: v.ocupacionPct != null ? +v.ocupacionPct : undefined,
-      habilitada:   v.habilitada,
-      observaciones:v.observaciones || undefined,
-    };
-    if (this.editandoEstPasiId != null) {
-      this.inventarioService.updateEstPasi(this.editandoEstPasiId, dto).subscribe();
-    } else {
-      this.inventarioService.createEstPasi(dto).subscribe();
-    }
-    this.closeModal();
+  deleteBodega(id: number): void {
+    if (confirm('¿Eliminar esta bodega?')) { this.inventarioService.deleteBodega(id).subscribe(); }
   }
-
-  deleteBodega(id: number):   void { if (!confirm('¿Eliminar esta bodega?'))    return; this.inventarioService.deleteBodega(id).subscribe(); }
-  deletePasillo(id: number):  void { if (!confirm('¿Eliminar este pasillo?'))   return; this.inventarioService.deletePasillo(id).subscribe(); }
-  deleteEstante(id: number):  void { if (!confirm('¿Eliminar este estante?'))   return; this.inventarioService.deleteEstante(id).subscribe(); }
-  deleteEstPasi(id: number):  void { if (!confirm('¿Eliminar esta asignación?'))return; this.inventarioService.deleteEstPasi(id).subscribe(); }
+  deletePasillo(id: number): void {
+    if (confirm('¿Eliminar este pasillo?')) { this.inventarioService.deletePasillo(id).subscribe(); }
+  }
+  deleteEstPasi(id: number): void {
+    if (confirm('¿Quitar este estante del pasillo?')) { this.inventarioService.deleteEstPasi(id).subscribe(); }
+  }
 
   toggleBodega(b: Bodega): void {
     if (b.idBodega == null) return;
     this.inventarioService.toggleBodega(b.idBodega).subscribe();
   }
 
+  toggleBodegaExpand(id: number): void {
+    if (this.expandedBodegas.has(id)) {
+      this.expandedBodegas.delete(id);
+    } else {
+      this.expandedBodegas.add(id);
+    }
+  }
+
+  togglePasilloExpand(id: number): void {
+    if (this.expandedPasillos.has(id)) {
+      this.expandedPasillos.delete(id);
+    } else {
+      this.expandedPasillos.add(id);
+    }
+  }
+
+  isBodegaExpanded(id: number):  boolean { return this.expandedBodegas.has(id); }
+  isPasilloExpanded(id: number): boolean { return this.expandedPasillos.has(id); }
+
   getPasillosDeBodega(idBodega: number): Pasillo[] {
     return this.pasillos.filter(p => p.idBodega === idBodega);
   }
 
+  getEstantesEnPasillo(idPasillo: number): EstPasi[] {
+    return this.estPasiList.filter(ep => ep.idPasillo === idPasillo);
+  }
+
   getOcupacionColor(pct?: number): string {
     if (pct == null) return 'text-gray-400';
-    if (pct >= 80) return 'text-red-600';
-    if (pct >= 50) return 'text-yellow-600';
+    if (pct >= 80)   return 'text-red-600';
+    if (pct >= 50)   return 'text-yellow-600';
     return 'text-green-600';
   }
 }

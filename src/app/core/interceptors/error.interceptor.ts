@@ -47,10 +47,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           if (isWrite) toast.error('Recurso no encontrado', 'El elemento que intentas modificar no existe.');
           break;
 
-        case 409:
-          toast.error('Conflicto', 'Ya existe un registro con esos datos.');
-          break;
-
         case 422:
         case 400:
           toast.error(
