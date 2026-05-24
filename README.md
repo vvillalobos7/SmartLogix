@@ -2,14 +2,62 @@
 
 Aplicación web de gestión logística. SPA construida con Angular 21 y Tailwind CSS, conectada al backend a través del API Gateway (BFF).
 
+**Repositorio backend:** https://github.com/benjazzx/SmartLogix (rama `develop`)
+
 ## Stack técnico
 
-| Componente | Versión |
+| Componente | Versión | Propósito |
+|---|---|---|
+| Angular | 21 | Framework principal SPA (Standalone Components) |
+| TypeScript | 5.x | Tipado estático |
+| Tailwind CSS | 3.x | Estilos utilitarios |
+| RxJS | 7.x | Programación reactiva (BehaviorSubject) |
+| Angular HTTP Client | — | Comunicación REST con el Gateway/BFF |
+
+## Prerrequisitos
+
+- Node.js 18+
+- npm 9+
+- Backend SmartLogix corriendo (Docker Compose en el repo backend)
+
+## Instalación y ejecución
+
+```bash
+# Clonar repositorio (rama frontend)
+git clone -b frontend https://github.com/benjazzx/SmartLogix.git
+
+# Instalar dependencias
+npm install
+
+# Servidor de desarrollo
+npm start
+# Disponible en http://localhost:4200
+```
+
+## Variables de entorno
+
+Configuradas en `src/environments/environment.ts`:
+
+```typescript
+export const environment = {
+  production: false,
+  services: {
+    gateway:    'http://localhost:8080/api',
+    usuarios:   'http://localhost:8080/api/usuarios',
+    ordenes:    'http://localhost:8080/api/ordenes',
+    inventario: 'http://localhost:8080/api/inventario',
+    productos:  'http://localhost:8080/api/productos',
+  }
+};
+```
+
+## Ramas Git
+
+| Rama | Descripción |
 |---|---|
-| Angular | 21 |
-| TypeScript | 5.x |
-| Tailwind CSS | 3.x |
-| RxJS | 7.x |
+| `main` | Código estable listo para producción |
+| `develop` | Integración de cambios backend (microservicios) |
+| `frontend` | Desarrollo de la aplicación Angular |
 
 ## Estructura de módulos
 
