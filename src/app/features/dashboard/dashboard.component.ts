@@ -80,9 +80,34 @@ export class DashboardComponent implements OnInit {
     return this.authService.hasRole('cliente');
   }
 
+  get esTransportista(): boolean {
+    return this.authService.hasRole('transportista');
+  }
+
+  get esAdmin(): boolean {
+    return this.authService.hasRole('admin');
+  }
+
+  get enviosAprobados(): Orden[] {
+    return this.ordenes.filter(o => o.estadoActual === 'Aprobado');
+  }
+
+  get enviosCancelados(): Orden[] {
+    return this.ordenes.filter(o => o.estadoActual === 'Cancelado');
+  }
+
+  get enviosRecientes(): Orden[] {
+    return [...this.ordenes]
+      .filter(o => ['Aprobado', 'En tránsito', 'Entregado', 'Cancelado'].includes(o.estadoActual ?? ''))
+      .sort((a, b) => new Date(b.fechaOrden ?? 0).getTime() - new Date(a.fechaOrden ?? 0).getTime())
+      .slice(0, 6);
+  }
+
   ngOnInit(): void {
     if (this.esCliente) {
       this.ordenService.getMisOrdenes().subscribe();
+    } else if (this.esTransportista) {
+      this.ordenService.getAll().subscribe();
     } else {
       this.ordenService.getAll().subscribe();
       this.inventarioService.getBodegas().subscribe();

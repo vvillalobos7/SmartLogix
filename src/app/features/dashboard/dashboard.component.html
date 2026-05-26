@@ -3,66 +3,69 @@
   <!-- ===== VISTA CLIENTE ===== -->
   @if (esCliente) {
 
-    <!-- Bienvenida cliente -->
-    <div class="bg-gradient-to-r from-emerald-700 to-teal-600 rounded-2xl p-6 text-white shadow-md">
-      <p class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Bienvenido</p>
-      <h2 class="text-xl font-bold">Tu espacio de pedidos</h2>
+    <div class="bg-gradient-to-r from-emerald-700 to-teal-600 rounded-2xl p-6 text-white shadow-lg">
+      <p class="text-xs font-semibold uppercase tracking-widest opacity-70 mb-1">Bienvenido</p>
+      <h2 class="text-2xl font-bold">Tu espacio de pedidos</h2>
       <p class="text-sm opacity-80 mt-1">Aquí puedes ver el estado de tus órdenes y hacer seguimiento en tiempo real.</p>
     </div>
 
-    <!-- KPIs de mis pedidos -->
     <div>
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Mis Pedidos</h3>
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        Mis Pedidos
+      </h3>
       <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-blue-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 font-mono">{{ ordenes.length }}</p>
-            <p class="text-xs text-gray-500">Total pedidos</p>
+            <p class="text-xs text-gray-500 font-medium">Total pedidos</p>
             <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ formatCurrency(getTotalOrdenes()) }}</p>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-yellow-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
           <div>
             <p class="text-2xl font-bold font-mono" [class]="ordenesPendientes.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ ordenesPendientes.length }}</p>
-            <p class="text-xs text-gray-500">Pendientes</p>
+            <p class="text-xs text-gray-500 font-medium">Pendientes</p>
             <p class="text-xs mt-0.5 text-gray-400">En espera de proceso</p>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-cyan-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
             </svg>
           </div>
           <div>
             <p class="text-2xl font-bold text-cyan-600 font-mono">{{ ordenesEnTransito.length }}</p>
-            <p class="text-xs text-gray-500">En tránsito</p>
-            <p class="text-xs text-cyan-500 mt-0.5">{{ ordenesEnTransito.length > 0 ? 'En camino a ti' : '—' }}</p>
+            <p class="text-xs text-gray-500 font-medium">En tránsito</p>
+            <p class="text-xs text-cyan-500 mt-0.5">{{ ordenesEnTransito.length > 0 ? 'En camino' : '—' }}</p>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-green-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </div>
           <div>
             <p class="text-2xl font-bold text-green-600 font-mono">{{ ordenesEntregadas.length }}</p>
-            <p class="text-xs text-gray-500">Entregados</p>
+            <p class="text-xs text-gray-500 font-medium">Entregados</p>
             <p class="text-xs text-green-500 mt-0.5">Completados</p>
           </div>
         </div>
@@ -70,9 +73,8 @@
       </div>
     </div>
 
-    <!-- Mis pedidos recientes -->
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/60">
         <div>
           <h2 class="text-sm font-semibold text-gray-700">Mis Pedidos Recientes</h2>
           <p class="text-xs text-gray-400 mt-0.5">{{ ordenes.length }} pedido{{ ordenes.length !== 1 ? 's' : '' }} registrado{{ ordenes.length !== 1 ? 's' : '' }}</p>
@@ -85,32 +87,39 @@
           <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fecha</th>
-                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Estado</th>
-                <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Total</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-50">
               @for (o of ordenesRecientes; track o.id) {
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-5 py-3 font-mono font-semibold text-xs text-gray-800">#{{ o.id }}</td>
-                  <td class="px-5 py-3 text-xs text-gray-400">{{ formatDate(o.fechaOrden) }}</td>
-                  <td class="px-5 py-3">
-                    <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="getEstadoBadge(o.estadoActual)">
+                <tr class="hover:bg-blue-50/30 transition-colors">
+                  <td class="px-5 py-3.5 font-mono font-bold text-xs text-gray-800">#{{ o.id }}</td>
+                  <td class="px-5 py-3.5 text-xs text-gray-500">{{ formatDate(o.fechaOrden) }}</td>
+                  <td class="px-5 py-3.5">
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold" [class]="getEstadoBadge(o.estadoActual)">
                       {{ o.estadoActual ?? '—' }}
                     </span>
                   </td>
-                  <td class="px-5 py-3 text-right font-mono text-xs font-semibold text-gray-800">
+                  <td class="px-5 py-3.5 text-right font-mono text-xs font-bold text-gray-800">
                     {{ formatCurrency(o.total ?? 0) }}
                   </td>
                 </tr>
               }
               @empty {
                 <tr>
-                  <td colspan="4" class="px-5 py-10 text-center">
-                    <p class="text-sm text-gray-400 mb-1">Aún no tienes pedidos</p>
-                    <p class="text-xs text-gray-300">Ve a "Mis Pedidos" para crear tu primer pedido</p>
+                  <td colspan="4" class="px-5 py-12 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                      <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                      </div>
+                      <p class="text-sm font-medium text-gray-400">Aún no tienes pedidos</p>
+                      <p class="text-xs text-gray-300">Ve a "Mis Pedidos" para crear tu primer pedido</p>
+                    </div>
                   </td>
                 </tr>
               }
@@ -122,63 +131,234 @@
 
   }
 
-  <!-- ===== VISTA STAFF (admin, bodeguero, transportista) ===== -->
-  @if (!esCliente) {
+  <!-- ===== VISTA TRANSPORTISTA ===== -->
+  @if (esTransportista) {
 
-    <!-- KPIs Órdenes -->
+    <div class="bg-gradient-to-r from-cyan-700 to-teal-600 rounded-2xl p-6 text-white shadow-lg flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest opacity-60 mb-1">Panel de Envíos</p>
+        <h2 class="text-2xl font-bold">Coordinación de Despachos</h2>
+        <p class="text-sm opacity-70 mt-1">Resumen de tus envíos asignados.</p>
+      </div>
+      <div class="hidden sm:flex items-center gap-4 text-right">
+        <div class="border-r border-white/20 pr-4">
+          <p class="text-2xl font-bold font-mono">{{ ordenes.length }}</p>
+          <p class="text-xs opacity-60">Envíos totales</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold font-mono">{{ ordenesEnTransito.length }}</p>
+          <p class="text-xs opacity-60">En ruta ahora</p>
+        </div>
+      </div>
+    </div>
+
     <div>
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Órdenes</h3>
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+        </svg>
+        Estado de Envíos
+      </h3>
       <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-indigo-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 font-mono">{{ ordenes.length }}</p>
-            <p class="text-xs text-gray-500">Total órdenes</p>
-            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ formatCurrency(getTotalOrdenes()) }}</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-2xl font-bold font-mono" [class]="ordenesPendientes.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ ordenesPendientes.length }}</p>
-            <p class="text-xs text-gray-500">Pendientes</p>
-            <p class="text-xs mt-0.5" [class]="ordenesPendientes.length > 0 ? 'text-yellow-500' : 'text-gray-400'">
-              {{ ordenesPendientes.length > 0 ? 'Requieren atención' : 'Todo procesado' }}
+            <p class="text-2xl font-bold font-mono" [class]="enviosAprobados.length > 0 ? 'text-indigo-600' : 'text-gray-900'">{{ enviosAprobados.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Listos para envío</p>
+            <p class="text-xs mt-0.5" [class]="enviosAprobados.length > 0 ? 'text-indigo-500' : 'text-gray-400'">
+              {{ enviosAprobados.length > 0 ? 'Pendientes de recoger' : '—' }}
             </p>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-cyan-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
             </svg>
           </div>
           <div>
             <p class="text-2xl font-bold text-cyan-600 font-mono">{{ ordenesEnTransito.length }}</p>
-            <p class="text-xs text-gray-500">En tránsito</p>
+            <p class="text-xs text-gray-500 font-medium">En tránsito</p>
+            <p class="text-xs text-cyan-500 mt-0.5">{{ ordenesEnTransito.length > 0 ? 'Activos en ruta' : '—' }}</p>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-green-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-green-600 font-mono">{{ ordenesEntregadas.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Entregados</p>
+            <p class="text-xs text-green-500 mt-0.5">Completados</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4"
+          [class]="enviosCancelados.length > 0 ? 'border-t-4 border-t-red-500' : ''">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
+            [class]="enviosCancelados.length > 0 ? 'bg-gradient-to-br from-red-500 to-red-600' : 'bg-gradient-to-br from-gray-300 to-gray-400'">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold font-mono" [class]="enviosCancelados.length > 0 ? 'text-red-600' : 'text-gray-900'">{{ enviosCancelados.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Cancelados</p>
+            <p class="text-xs mt-0.5" [class]="enviosCancelados.length > 0 ? 'text-red-500' : 'text-gray-400'">{{ enviosCancelados.length > 0 ? 'Requieren revisión' : '—' }}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-semibold text-gray-700">Envíos Recientes</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Últimos 6 envíos asignados</p>
+        </div>
+        <span class="text-xs bg-cyan-50 text-cyan-600 font-semibold px-2.5 py-1 rounded-full">Últimas 6</span>
+      </div>
+      @if (cargando) {
+        <div class="px-5 py-10 text-center text-xs text-gray-400">Cargando envíos...</div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Destino</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              @for (o of enviosRecientes; track o.id) {
+                <tr class="hover:bg-cyan-50/30 transition-colors">
+                  <td class="px-5 py-3.5 font-mono font-bold text-xs text-gray-800">#{{ o.id }}</td>
+                  <td class="px-5 py-3.5 text-xs text-gray-500 font-mono">{{ o.direccionTexto ?? '—' }}</td>
+                  <td class="px-5 py-3.5 text-xs text-gray-400">{{ formatDate(o.fechaOrden) }}</td>
+                  <td class="px-5 py-3.5">
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold" [class]="getEstadoBadge(o.estadoActual)">
+                      {{ o.estadoActual ?? '—' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+              @empty {
+                <tr>
+                  <td colspan="4" class="px-5 py-12 text-center">
+                    <div class="flex flex-col items-center gap-2">
+                      <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                      </div>
+                      <p class="text-sm font-medium text-gray-400">Sin envíos asignados</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+  }
+
+  <!-- ===== VISTA STAFF ===== -->
+  @if (!esCliente && !esTransportista) {
+
+    <!-- Banner bienvenida staff -->
+    <div class="bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-6 text-white shadow-lg flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest opacity-60 mb-1">Panel de Control</p>
+        <h2 class="text-2xl font-bold">SmartLogix Dashboard</h2>
+        <p class="text-sm opacity-70 mt-1">Resumen en tiempo real del sistema logístico.</p>
+      </div>
+      <div class="hidden sm:flex items-center gap-4 text-right">
+        <div class="border-r border-white/20 pr-4">
+          <p class="text-2xl font-bold font-mono">{{ ordenes.length }}</p>
+          <p class="text-xs opacity-60">Órdenes totales</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold font-mono">{{ formatCurrency(getTotalOrdenes()) }}</p>
+          <p class="text-xs opacity-60">Facturación total</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs Órdenes -->
+    <div>
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        Órdenes
+      </h3>
+      <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-blue-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-900 font-mono">{{ ordenes.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Total órdenes</p>
+            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ formatCurrency(getTotalOrdenes()) }}</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-yellow-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold font-mono" [class]="ordenesPendientes.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ ordenesPendientes.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Pendientes</p>
+            <p class="text-xs mt-0.5 font-medium" [class]="ordenesPendientes.length > 0 ? 'text-yellow-500' : 'text-gray-400'">
+              {{ ordenesPendientes.length > 0 ? 'Requieren atención' : 'Todo procesado ✓' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-cyan-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-cyan-600 font-mono">{{ ordenesEnTransito.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">En tránsito</p>
+            <p class="text-xs text-cyan-500 mt-0.5">Activos en ruta</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-green-500 shadow-sm p-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </div>
           <div>
             <p class="text-2xl font-bold text-green-600 font-mono">{{ ordenesEntregadas.length }}</p>
-            <p class="text-xs text-gray-500">Entregadas</p>
+            <p class="text-xs text-gray-500 font-medium">Entregadas</p>
+            <p class="text-xs text-green-500 mt-0.5">Completadas</p>
           </div>
         </div>
 
@@ -189,90 +369,117 @@
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
 
       <div>
-        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Inventario</h3>
+        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
+          </svg>
+          Recursos
+        </h3>
         <div class="grid grid-cols-3 gap-3">
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-violet-500 shadow-sm p-4 text-center">
             <p class="text-2xl font-bold text-gray-900 font-mono">{{ bodegas.length }}</p>
-            <p class="text-xs text-gray-500">Bodegas</p>
-            <p class="text-xs text-green-600 mt-0.5">{{ bodegasActivas.length }} activas</p>
+            <p class="text-xs text-gray-500 font-medium">Bodegas</p>
+            <p class="text-xs text-violet-600 mt-0.5 font-semibold">{{ bodegasActivas.length }} activas</p>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          @if (esAdmin) {
+          <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-indigo-500 shadow-sm p-4 text-center">
             <p class="text-2xl font-bold text-gray-900 font-mono">{{ usuarios.length }}</p>
-            <p class="text-xs text-gray-500">Usuarios</p>
+            <p class="text-xs text-gray-500 font-medium">Usuarios</p>
             <p class="text-xs text-gray-400 mt-0.5">registrados</p>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          }
+          <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-pink-500 shadow-sm p-4 text-center">
             <p class="text-2xl font-bold text-gray-900 font-mono">{{ productos.length }}</p>
-            <p class="text-xs text-gray-500">Productos</p>
+            <p class="text-xs text-gray-500 font-medium">Productos</p>
             <p class="text-xs text-gray-400 mt-0.5">en catálogo</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Stock</h3>
+        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
+          </svg>
+          Stock
+        </h3>
         <div class="grid grid-cols-3 gap-3">
-          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+          <div class="bg-white rounded-xl border border-gray-100 border-t-4 border-t-green-500 shadow-sm p-4 text-center">
             <p class="text-2xl font-bold text-green-600 font-mono">{{ productosActivos.length }}</p>
-            <p class="text-xs text-gray-500">Activos</p>
-          </div>
-          <div class="bg-white rounded-xl border border-yellow-100 shadow-sm p-4 text-center"
-            [class.border-yellow-200]="productosStockBajo.length > 0">
-            <p class="text-2xl font-bold font-mono" [class]="productosStockBajo.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ productosStockBajo.length }}</p>
-            <p class="text-xs text-gray-500">Stock bajo</p>
-            <p class="text-xs text-yellow-500 mt-0.5">{{ productosStockBajo.length > 0 ? 'menos de 10 uds' : '' }}</p>
+            <p class="text-xs text-gray-500 font-medium">Activos</p>
+            <p class="text-xs text-green-500 mt-0.5">disponibles</p>
           </div>
           <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center"
-            [class.border-red-200]="productosAgotados.length > 0">
+            [class]="productosStockBajo.length > 0 ? 'border-t-4 border-t-yellow-500' : ''">
+            <p class="text-2xl font-bold font-mono" [class]="productosStockBajo.length > 0 ? 'text-yellow-600' : 'text-gray-900'">{{ productosStockBajo.length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Stock bajo</p>
+            <p class="text-xs text-yellow-500 mt-0.5">{{ productosStockBajo.length > 0 ? '< 10 uds' : '—' }}</p>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center"
+            [class]="productosAgotados.length > 0 ? 'border-t-4 border-t-red-500' : ''">
             <p class="text-2xl font-bold font-mono" [class]="productosAgotados.length > 0 ? 'text-red-600' : 'text-gray-900'">{{ productosAgotados.length }}</p>
-            <p class="text-xs text-gray-500">Agotados</p>
-            <p class="text-xs text-red-500 mt-0.5">{{ productosAgotados.length > 0 ? 'sin stock' : '' }}</p>
+            <p class="text-xs text-gray-500 font-medium">Agotados</p>
+            <p class="text-xs text-red-500 mt-0.5">{{ productosAgotados.length > 0 ? 'sin stock' : '—' }}</p>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- Órdenes recientes + resumen estados -->
+    <!-- Tabla órdenes + panel estados -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
       <div class="xl:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-          <h2 class="text-sm font-semibold text-gray-700">Órdenes Recientes</h2>
-          <p class="text-xs text-gray-400 mt-0.5">{{ ordenes.length }} total · ordenadas por fecha</p>
+        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-700">Órdenes Recientes</h2>
+            <p class="text-xs text-gray-400 mt-0.5">{{ ordenes.length }} total · ordenadas por fecha</p>
+          </div>
+          <span class="text-xs bg-blue-50 text-blue-600 font-semibold px-2.5 py-1 rounded-full">Últimas 6</span>
         </div>
         @if (cargando) {
-          <div class="px-5 py-10 text-center text-xs text-gray-400">Cargando datos del backend...</div>
+          <div class="px-5 py-10 text-center text-xs text-gray-400">Cargando datos...</div>
         } @else {
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Cliente</th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fecha</th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Estado</th>
-                  <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Total</th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-gray-50">
                 @for (o of ordenesRecientes; track o.id) {
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3 font-mono font-semibold text-xs text-gray-800">#{{ o.id }}</td>
-                    <td class="px-5 py-3 text-xs font-medium text-gray-800">{{ o.userNombre ?? '—' }}</td>
-                    <td class="px-5 py-3 text-xs text-gray-400">{{ formatDate(o.fechaOrden) }}</td>
-                    <td class="px-5 py-3">
-                      <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="getEstadoBadge(o.estadoActual)">
+                  <tr class="hover:bg-blue-50/30 transition-colors">
+                    <td class="px-5 py-3.5 font-mono font-bold text-xs text-gray-800">#{{ o.id }}</td>
+                    <td class="px-5 py-3.5 text-xs font-medium text-gray-700">{{ o.userNombre ?? '—' }}</td>
+                    <td class="px-5 py-3.5 text-xs text-gray-400">{{ formatDate(o.fechaOrden) }}</td>
+                    <td class="px-5 py-3.5">
+                      <span class="text-xs px-2.5 py-1 rounded-full font-semibold" [class]="getEstadoBadge(o.estadoActual)">
                         {{ o.estadoActual ?? '—' }}
                       </span>
                     </td>
-                    <td class="px-5 py-3 text-right font-mono text-xs font-semibold text-gray-800">
+                    <td class="px-5 py-3.5 text-right font-mono text-xs font-bold text-gray-800">
                       {{ formatCurrency(o.total ?? 0) }}
                     </td>
                   </tr>
                 }
                 @empty {
-                  <tr><td colspan="5" class="px-5 py-8 text-center text-xs text-gray-400">Sin órdenes registradas.</td></tr>
+                  <tr>
+                    <td colspan="5" class="px-5 py-12 text-center">
+                      <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                          <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                          </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-400">Sin órdenes registradas</p>
+                      </div>
+                    </td>
+                  </tr>
                 }
               </tbody>
             </table>
@@ -280,42 +487,54 @@
         }
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-          <h2 class="text-sm font-semibold text-gray-700">Por Estado</h2>
-          <p class="text-xs text-gray-400 mt-0.5">Distribución de órdenes</p>
-        </div>
-        <div class="divide-y divide-gray-50">
-          @for (e of resumenEstados; track e.estado) {
-            <div class="px-5 py-3 flex items-center justify-between">
-              <span class="text-xs px-2 py-0.5 rounded-full font-semibold" [class]="e.badge">{{ e.estado }}</span>
-              <span class="font-mono text-sm font-bold text-gray-800">{{ e.cantidad }}</span>
-            </div>
-          }
-          @empty {
-            <div class="px-5 py-8 text-center text-xs text-gray-400">Sin datos</div>
-          }
+      <!-- Panel lateral -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Distribución por estado -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex-1">
+          <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/60">
+            <h2 class="text-sm font-semibold text-gray-700">Por Estado</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Distribución de órdenes</p>
+          </div>
+          <div class="divide-y divide-gray-50 p-1">
+            @for (e of resumenEstados; track e.estado) {
+              <div class="px-4 py-2.5 flex items-center justify-between rounded-lg">
+                <span class="text-xs px-2.5 py-1 rounded-full font-semibold" [class]="e.badge">{{ e.estado }}</span>
+                <span class="font-mono text-sm font-bold text-gray-800 bg-gray-100 px-2.5 py-0.5 rounded-full">{{ e.cantidad }}</span>
+              </div>
+            }
+            @empty {
+              <div class="px-5 py-8 text-center text-xs text-gray-400">Sin datos</div>
+            }
+          </div>
         </div>
 
+        <!-- Alertas de stock -->
         @if (productosAgotados.length > 0 || productosStockBajo.length > 0) {
-          <div class="border-t border-gray-100 px-5 py-4">
-            <p class="text-xs font-semibold text-gray-600 mb-3">Alertas de Stock</p>
-            <div class="space-y-2">
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-gray-100 bg-red-50/60 flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <p class="text-xs font-semibold text-red-700">Alertas de Stock</p>
+            </div>
+            <div class="p-3 space-y-1.5">
               @for (p of productosAgotados; track p.id) {
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-700 truncate max-w-36">{{ p.nombre }}</span>
-                  <span class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Agotado</span>
+                <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-red-50">
+                  <span class="text-xs text-gray-700 truncate max-w-32 font-medium">{{ p.nombre }}</span>
+                  <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full flex-shrink-0">Agotado</span>
                 </div>
               }
               @for (p of productosStockBajo; track p.id) {
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-700 truncate max-w-36">{{ p.nombre }}</span>
-                  <span class="text-xs font-semibold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">{{ p.stock }} uds</span>
+                <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-yellow-50">
+                  <span class="text-xs text-gray-700 truncate max-w-32 font-medium">{{ p.nombre }}</span>
+                  <span class="text-xs font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full flex-shrink-0">{{ p.stock }} uds</span>
                 </div>
               }
             </div>
           </div>
         }
+
       </div>
 
     </div>
