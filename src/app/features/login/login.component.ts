@@ -40,8 +40,12 @@ export class LoginComponent implements OnInit {
     this.errorMsg = '';
     this.authService.login(this.form.value).subscribe({
       next: () => this.router.navigate(['/dashboard']),
-      error: () => {
-        this.errorMsg = 'Credenciales inválidas. Verifica tu correo y contraseña.';
+      error: (err) => {
+        if (err?.status === 429) {
+          this.errorMsg = 'Demasiados intentos. Espera 1 minuto e intenta de nuevo.';
+        } else {
+          this.errorMsg = 'Credenciales inválidas. Verifica tu correo y contraseña.';
+        }
         this.loading = false;
         this.cdr.detectChanges();
       },

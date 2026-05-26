@@ -6,7 +6,7 @@ import {
   Bodega, BodegaRequest,
   Pasillo, PasilloRequest,
   Estante, EstanteRequest,
-  EstPasi,
+  EstPasi, EstPasiRequest,
 } from '../../shared/models/models';
 
 @Component({
@@ -25,11 +25,16 @@ export class InventarioComponent implements OnInit {
   expandedPasillos = new Set<number>();
 
   showModal = false;
-  modalTipo: 'bodega' | 'pasillo' | 'estante' = 'bodega';
+  modalTipo: 'bodega' | 'pasillo' | 'estante' | 'editEstPasi' | 'editPasillo' = 'bodega';
 
-  bodegaForm!:  FormGroup;
-  pasilloForm!: FormGroup;
-  estanteForm!: FormGroup;
+  bodegaForm!:      FormGroup;
+  pasilloForm!:     FormGroup;
+  estanteForm!:     FormGroup;
+  editEstPasiForm!: FormGroup;
+  editPasilloForm!: FormGroup;
+
+  editingEstPasi:  EstPasi  | null = null;
+  editingPasillo:  Pasillo  | null = null;
 
   constructor(
     private readonly inventarioService: InventarioService,
@@ -78,6 +83,15 @@ export class InventarioComponent implements OnInit {
       numNiveles:        [1, [Validators.required, Validators.min(1)]],
       capacidadPorNivel: [0, Validators.min(0)],
       idPasillo:         [null, Validators.required],
+    });
+    this.editEstPasiForm = this.fb.group({
+      posicion:      [''],
+      ocupacionPct:  [0, [Validators.min(0), Validators.max(100)]],
+      habilitada:    [true],
+      observaciones: [''],
+    });
+    this.editPasilloForm = this.fb.group({
+      descripcion: [''],
     });
   }
 
@@ -176,5 +190,53 @@ export class InventarioComponent implements OnInit {
     if (pct >= 80)   return 'text-red-600';
     if (pct >= 50)   return 'text-yellow-600';
     return 'text-green-600';
+  }
+
+  openEditEstPasi(ep: EstPasi): void {
+    this.editingEstPasi = ep;
+    this.modalTipo = 'editEstPasi';
+    this.editEstPasiForm.reset({
+      posicion:      ep.posicion ?? '',
+      ocupacionPct:  ep.ocupacionPct ?? 0,
+      habilitada:    ep.habilitada !== false,
+      observaciones: ep.observaciones ?? '',
+    });
+    this.showModal = true;
+  }
+
+  onSubmitEditEstPasi(): void {
+    if (!this.editingEstPasi?.idEstPasi) return;
+    const ep = this.editingEstPasi;
+    const v  = this.editEstPasiForm.value;
+    const dto: EstPasiRequest = {
+      idEstante:     ep.idEstante!,
+      idPasillo:     ep.idPasillo!,
+      posicion:      v.posicion || undefined,
+      ocupacionPct:  Number(v.ocupacionPct),
+      habilitada:    v.habilitada,
+      observaciones: v.observaciones || undefined,
+    };
+    this.inventarioService.updateEstPasi(ep.idEstPasi!, dto).subscribe(() => this.closeModal());
+  }
+
+  openEditPasillo(p: Pasillo): void {
+    this.editingPasillo = p;
+    this.modalTipo = 'editPasillo';
+    this.editPasilloForm.reset({ descripcion: p.descripcion ?? '' });
+    this.showModal = true;
+  }
+
+  onSubmitEditPasillo(): void {
+    if (!this.editingPasillo?.idPasillo) return;
+    const p  = this.editingPasillo;
+    const v  = this.editPasilloForm.value;
+    const dto: PasilloRequest = {
+      codigo:      p.codigo!,
+      descripcion: v.descripcion,
+      numeroOrden: p.numeroOrden ?? 1,
+      idBodega:    p.idBodega!,
+      activo:      p.activo !== false,
+    };
+    this.inventarioService.updatePasillo(p.idPasillo!, dto).subscribe(() => this.closeModal());
   }
 }
