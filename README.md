@@ -35,6 +35,29 @@ npm start
 # Disponible en http://localhost:4200
 ```
 
+## Pruebas unitarias y cobertura
+
+El proyecto utiliza **Vitest** como motor de pruebas unitarias integrado con Angular CLI.
+
+### Ejecución de pruebas
+
+Para ejecutar la suite de pruebas unitarias localmente:
+```bash
+npm test
+```
+
+Para ejecutar las pruebas y generar reportes de cobertura (con una meta de cobertura > 80%):
+```bash
+npm run test:coverage
+```
+Esto generará los archivos de reporte de cobertura dentro de la carpeta `coverage/SmartLogix/` (incluyendo `lcov.info`).
+
+### Integración con SonarQube
+
+Se incluye el archivo `sonar-project.properties` en la raíz del proyecto preconfigurado para SonarQube. Para analizar la calidad del código y la cobertura:
+1. Genera primero el reporte de cobertura corriendo `npm run test:coverage`.
+2. Ejecuta el Sonar Scanner en la raíz del proyecto. El escáner cargará automáticamente los archivos de código y el reporte `lcov.info`.
+
 ## Variables de entorno
 
 Configuradas en `src/environments/environment.ts`:
