@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:coverage": "ng test --watch=false --coverage --coverage-reporters lcov --coverage-reporters text-summary --coverage-include \"src/app/core/services/**/*\" --coverage-include \"src/app/services/**/*\" --coverage-include \"src/app/features/**/*.service.ts\"",
+    "test:coverage": "ng test --watch=false --coverage --coverage-reporters lcov --coverage-reporters text-summary --coverage-include \"src/app/core/services/**/*\" --coverage-include \"src/app/services/**/*\" --coverage-include \"src/app/features/**/*.service.ts\" --coverage-include \"src/app/features/**/*.component.ts\"",
     "serve:ssr:SmartLogix": "node dist/SmartLogix/server/server.mjs"
   },
   "private": true,
