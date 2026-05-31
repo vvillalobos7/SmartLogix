@@ -163,7 +163,7 @@ describe('ProductoService (Feature)', () => {
     });
 
     it('should upload product image', async () => {
-      const mockProduct: Producto = { id: '1', nombre: 'P1', precio: 10, stock: 5, imagenUrl: 'http://img.com' };
+      const mockProduct: Producto = { id: '1', nombre: 'P1', precio: 10, stock: 5, imagenUrl: 'https://img.example.com/producto.png' };
       const file = new File([''], 'filename.png', { type: 'image/png' });
 
       const promise = firstValueFrom(service.subirImagen('1', file));
@@ -172,7 +172,7 @@ describe('ProductoService (Feature)', () => {
       req.flush(mockProduct);
 
       const product = await promise;
-      expect(product?.imagenUrl).toBe('http://img.com');
+      expect(product?.imagenUrl).toBe('https://img.example.com/producto.png');
     });
 
     it('should return null on upload image fail', async () => {
