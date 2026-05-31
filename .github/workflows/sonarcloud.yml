@@ -1,0 +1,53 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: Análisis SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Requerido por SonarCloud para análisis completo del historial
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar pruebas y generar reporte de cobertura (lcov.info)
+        run: npm run test:coverage
+
+      - name: Verificar que el archivo lcov.info fue generado
+        run: |
+          if [ ! -f "coverage/SmartLogix/lcov.info" ]; then
+            echo "❌ ERROR: No se encontró el archivo coverage/SmartLogix/lcov.info"
+            exit 1
+          fi
+          echo "✅ Archivo lcov.info generado correctamente"
+          wc -l coverage/SmartLogix/lcov.info
+
+      - name: Análisis SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUDTOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.organization=vvillalobos7
+            -Dsonar.projectKey=vvillalobos7_SmartLogix
+            -Dsonar.javascript.lcov.reportPaths=coverage/SmartLogix/lcov.info
