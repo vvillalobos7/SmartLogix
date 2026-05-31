@@ -42,7 +42,7 @@ jobs:
           wc -l coverage/SmartLogix/lcov.info
 
       - name: Análisis SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUDTOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
