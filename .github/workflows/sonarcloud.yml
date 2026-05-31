@@ -42,10 +42,12 @@ jobs:
           wc -l coverage/SmartLogix/lcov.info
 
       - name: Análisis SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUDTOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
+            -Dsonar.organization=vvillalobos7
+            -Dsonar.projectKey=vvillalobos7_SmartLogix
             -Dsonar.javascript.lcov.reportPaths=coverage/SmartLogix/lcov.info
