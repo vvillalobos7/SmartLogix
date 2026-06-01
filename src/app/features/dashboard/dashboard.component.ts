@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { OrdenService } from '../ordenes/orden.service';
 import { InventarioService } from '../inventario/inventario.service';
@@ -6,6 +7,7 @@ import { ProductoService } from '../productos/producto.service';
 import { UsuarioService } from '../usuarios/usuario.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Orden, Bodega, Producto, Usuario } from '../../shared/models/models';
+import { getEstadoBadge, formatCurrency, formatDate } from '../../shared/helpers/format.helpers';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +22,7 @@ export class DashboardComponent implements OnInit {
   usuarios: Usuario[] = [];
 
   cargando = true;
+  private readonly destroyRef = inject(DestroyRef);
 
   get ordenesHoy(): number {
     const hoy = new Date().toISOString().split('T')[0];
@@ -27,15 +30,15 @@ export class DashboardComponent implements OnInit {
   }
 
   get ordenesPendientes(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Pendiente');
+    return this.filterByEstado('Pendiente');
   }
 
   get ordenesEnTransito(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'En tránsito');
+    return this.filterByEstado('En tránsito');
   }
 
   get ordenesEntregadas(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Entregado');
+    return this.filterByEstado('Entregado');
   }
 
   get bodegasActivas(): Bodega[] {
@@ -63,7 +66,7 @@ export class DashboardComponent implements OnInit {
   get resumenEstados(): { estado: string; cantidad: number; badge: string }[] {
     const estados = ['Pendiente', 'Procesando', 'Aprobado', 'En tránsito', 'Entregado', 'Cancelado'];
     return estados
-      .map(e => ({ estado: e, cantidad: this.ordenes.filter(o => o.estadoActual === e).length, badge: this.getEstadoBadge(e) }))
+      .map(e => ({ estado: e, cantidad: this.filterByEstado(e).length, badge: this.getEstadoBadge(e) }))
       .filter(e => e.cantidad > 0);
   }
 
@@ -75,6 +78,10 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  private filterByEstado(estado: string): Orden[] {
+    return this.ordenes.filter(o => o.estadoActual === estado);
+  }
 
   get esCliente(): boolean {
     return this.authService.hasRole('cliente');
@@ -89,11 +96,11 @@ export class DashboardComponent implements OnInit {
   }
 
   get enviosAprobados(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Aprobado');
+    return this.filterByEstado('Aprobado');
   }
 
   get enviosCancelados(): Orden[] {
-    return this.ordenes.filter(o => o.estadoActual === 'Cancelado');
+    return this.filterByEstado('Cancelado');
   }
 
   get enviosRecientes(): Orden[] {
@@ -114,33 +121,24 @@ export class DashboardComponent implements OnInit {
       this.productoService.getAll().subscribe();
       this.usuarioService.getAll().subscribe();
 
-      this.inventarioService.bodegas$.subscribe(b => { this.bodegas = b; this.cdr.detectChanges(); });
-      this.productoService.productos$.subscribe(p => { this.productos = p; this.cdr.detectChanges(); });
-      this.usuarioService.usuarios$.subscribe(u => { this.usuarios = u; this.cdr.detectChanges(); });
+      this.inventarioService.bodegas$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(b => { this.bodegas = b; this.cdr.detectChanges(); });
+      this.productoService.productos$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => { this.productos = p; this.cdr.detectChanges(); });
+      this.usuarioService.usuarios$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(u => { this.usuarios = u; this.cdr.detectChanges(); });
     }
 
-    this.ordenService.ordenes$.subscribe(o => { this.ordenes = o; this.cargando = false; this.cdr.detectChanges(); });
+    this.ordenService.ordenes$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(o => { this.ordenes = o; this.cargando = false; this.cdr.detectChanges(); });
   }
 
   getEstadoBadge(estado?: string): string {
-    const map: Record<string, string> = {
-      'Pendiente':   'bg-yellow-100 text-yellow-800',
-      'Procesando':  'bg-blue-100 text-blue-800',
-      'Aprobado':    'bg-indigo-100 text-indigo-800',
-      'En tránsito': 'bg-cyan-100 text-cyan-800',
-      'Entregado':   'bg-green-100 text-green-800',
-      'Cancelado':   'bg-red-100 text-red-800',
-    };
-    return map[estado ?? ''] ?? 'bg-gray-100 text-gray-600';
+    return getEstadoBadge(estado);
   }
 
   formatCurrency(v: number): string {
-    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v ?? 0);
+    return formatCurrency(v);
   }
 
   formatDate(iso?: string): string {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return formatDate(iso);
   }
 
   getTotalOrdenes(): number {

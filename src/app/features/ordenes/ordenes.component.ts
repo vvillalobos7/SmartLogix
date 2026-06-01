@@ -1,4 +1,5 @@
-﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -10,6 +11,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { ProductoService } from '../productos/producto.service';
 import { environment } from '../../../environments/environment';
 import { Orden, HistorialEntry, HistorialRequest, Estado, Producto, OrdenRequest } from '../../shared/models/models';
+import { getEstadoBadge, formatCurrency, formatDate } from '../../shared/helpers/format.helpers';
 
 @Component({
   selector: 'app-ordenes',
@@ -30,14 +32,18 @@ export class OrdenesComponent implements OnInit {
     return this.estadosDisponibles.map(e => e.nombre);
   }
 
-  get ordenesFiltradas(): Orden[] {
-    return this.filtroEstado
-      ? this.ordenes.filter(o => o.estadoActual === this.filtroEstado)
+  filterByEstado(estado: string): Orden[] {
+    return estado
+      ? this.ordenes.filter(o => o.estadoActual === estado)
       : this.ordenes;
   }
 
+  get ordenesFiltradas(): Orden[] {
+    return this.filterByEstado(this.filtroEstado);
+  }
+
   countByEstado(estado: string): number {
-    return this.ordenes.filter(o => o.estadoActual === estado).length;
+    return estado ? this.filterByEstado(estado).length : 0;
   }
 
   // Nuevo pedido
@@ -72,6 +78,8 @@ export class OrdenesComponent implements OnInit {
     private readonly productoService: ProductoService,
   ) {}
 
+  private readonly destroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
     this.initHistorialForm();
     this.estadoOrdenService.getAll().subscribe(data => {
@@ -82,7 +90,7 @@ export class OrdenesComponent implements OnInit {
     } else {
       this.ordenService.getAll().subscribe();
     }
-    this.ordenService.ordenes$.subscribe(o => {
+    this.ordenService.ordenes$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(o => {
       this.ordenes = o;
       this.cdr.detectChanges();
     });
@@ -129,24 +137,15 @@ export class OrdenesComponent implements OnInit {
   }
 
   getEstadoBadge(estado?: string): string {
-    const map: Record<string, string> = {
-      'Pendiente':   'bg-yellow-100 text-yellow-800',
-      'Procesando':  'bg-blue-100 text-blue-800',
-      'Aprobado':    'bg-indigo-100 text-indigo-800',
-      'En tránsito': 'bg-cyan-100 text-cyan-800',
-      'Entregado':   'bg-green-100 text-green-800',
-      'Cancelado':   'bg-red-100 text-red-800',
-    };
-    return map[estado ?? ''] ?? 'bg-gray-100 text-gray-600';
+    return getEstadoBadge(estado);
   }
 
   formatCurrency(v: number): string {
-    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v ?? 0);
+    return formatCurrency(v);
   }
 
   formatDate(iso?: string): string {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return formatDate(iso);
   }
 
   getHistorial(o: Orden): HistorialEntry[] {
@@ -166,7 +165,7 @@ export class OrdenesComponent implements OnInit {
         this.toast.success('Orden cancelada', `La orden #${o.id} fue cancelada.`);
         this.ordenService.getMisOrdenes().subscribe();
       },
-      error: () => {},
+      error: () => { console.warn(`Error al cancelar orden #${o.id}`); },
     });
   }
 
@@ -183,7 +182,7 @@ export class OrdenesComponent implements OnInit {
         this.toast.success('¡Recibo confirmado!', `Confirmaste la recepción del pedido #${o.id}.`);
         this.ordenService.getMisOrdenes().subscribe();
       },
-      error: () => {},
+      error: () => { console.warn(`Error al confirmar entrega orden #${o.id}`); },
     });
   }
 

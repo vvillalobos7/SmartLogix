@@ -34,6 +34,8 @@ export class EnvioService {
   }
 
   cargarOrdenes(): void {
-    this.ordenService.getAll().subscribe();
+    this.ordenService.getAll().subscribe({
+      error: () => {}
+    });
   }
 }

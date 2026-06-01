@@ -144,4 +144,197 @@ describe('DashboardComponent', () => {
       expect(formattedDate).not.toBe('—');
     });
   });
+
+  describe('filterByEstado helper method', () => {
+    beforeEach(() => {
+      authServiceSpy.hasRole.mockReturnValue(false);
+      fixture.detectChanges();
+    });
+
+    it('should filter orders by estado correctly', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente', total: 1000 },
+        { id: 2, estadoActual: 'En tránsito', total: 2000 },
+        { id: 3, estadoActual: 'Pendiente', total: 1500 },
+        { id: 4, estadoActual: 'Entregado', total: 3000 },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      expect(component['filterByEstado']('Pendiente').length).toBe(2);
+      expect(component['filterByEstado']('En tránsito').length).toBe(1);
+      expect(component['filterByEstado']('Entregado').length).toBe(1);
+      expect(component['filterByEstado']('Cancelado').length).toBe(0);
+    });
+
+    it('should return empty array when no orders match estado', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente', total: 1000 },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      expect(component['filterByEstado']('Cancelado')).toEqual([]);
+    });
+
+    it('should return all filtered orders, not mutate original array', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente', total: 1000 },
+        { id: 2, estadoActual: 'Pendiente', total: 2000 },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      const filtered = component['filterByEstado']('Pendiente');
+      expect(filtered.length).toBe(2);
+      expect(component.ordenes.length).toBe(2);
+    });
+  });
+
+  describe('Empty ordenes array', () => {
+    beforeEach(() => {
+      authServiceSpy.hasRole.mockReturnValue(false);
+      fixture.detectChanges();
+    });
+
+    it('should return empty array when ordenes is empty', () => {
+      ordenesSubject.next([]);
+
+      expect(component.ordenesPendientes).toEqual([]);
+      expect(component.ordenesEnTransito).toEqual([]);
+      expect(component.ordenesEntregadas).toEqual([]);
+      expect(component.enviosAprobados).toEqual([]);
+      expect(component.enviosCancelados).toEqual([]);
+    });
+
+    it('should handle filtroEstado with empty array gracefully', () => {
+      ordenesSubject.next([]);
+
+      expect(component['filterByEstado']('Pendiente')).toEqual([]);
+      expect(component['filterByEstado']('Cancelado')).toEqual([]);
+    });
+  });
+
+  describe('Null and undefined estadoActual values', () => {
+    beforeEach(() => {
+      authServiceSpy.hasRole.mockReturnValue(false);
+      fixture.detectChanges();
+    });
+
+    it('should handle null estadoActual values correctly', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente', total: 1000 },
+        { id: 2, estadoActual: null as any, total: 2000 },
+        { id: 3, estadoActual: 'Pendiente', total: 1500 },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      expect(component.ordenesPendientes.length).toBe(2);
+      expect(component['filterByEstado']('Pendiente')).toEqual(mockOrders.slice(0, 1).concat(mockOrders.slice(2)));
+    });
+
+    it('should handle undefined estadoActual values correctly', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente', total: 1000 },
+        { id: 2, estadoActual: undefined, total: 2000 },
+        { id: 3, estadoActual: 'Entregado', total: 1500 },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      expect(component.ordenesPendientes.length).toBe(1);
+      expect(component.ordenesEntregadas.length).toBe(1);
+      expect(component['filterByEstado']('Pendiente')[0].id).toBe(1);
+    });
+
+    it('should not match orders with null/undefined when filtering by specific estado', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: undefined },
+        { id: 3, estadoActual: null as any },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      const pendientes = component['filterByEstado']('Pendiente');
+      expect(pendientes.length).toBe(1);
+      expect(pendientes[0].id).toBe(1);
+    });
+  });
+
+  describe('Role-based getters', () => {
+    it('esCliente should return true when client role is set', () => {
+      authServiceSpy.hasRole.mockImplementation((role: string) => role === 'cliente');
+      fixture.detectChanges();
+
+      expect(component.esCliente).toBe(true);
+      expect(component.esTransportista).toBe(false);
+      expect(component.esAdmin).toBe(false);
+    });
+
+    it('esTransportista should return true when transportista role is set', () => {
+      authServiceSpy.hasRole.mockImplementation((role: string) => role === 'transportista');
+      fixture.detectChanges();
+
+      expect(component.esCliente).toBe(false);
+      expect(component.esTransportista).toBe(true);
+      expect(component.esAdmin).toBe(false);
+    });
+
+    it('esAdmin should return true when admin role is set', () => {
+      authServiceSpy.hasRole.mockImplementation((role: string) => role === 'admin');
+      fixture.detectChanges();
+
+      expect(component.esCliente).toBe(false);
+      expect(component.esTransportista).toBe(false);
+      expect(component.esAdmin).toBe(true);
+    });
+
+    it('should have all role getters return false by default', () => {
+      authServiceSpy.hasRole.mockReturnValue(false);
+      fixture.detectChanges();
+
+      expect(component.esCliente).toBe(false);
+      expect(component.esTransportista).toBe(false);
+      expect(component.esAdmin).toBe(false);
+    });
+  });
+
+  describe('All estado filters using filterByEstado', () => {
+    beforeEach(() => {
+      authServiceSpy.hasRole.mockReturnValue(false);
+      fixture.detectChanges();
+    });
+
+    it('should correctly filter all order status types', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente', total: 100 },
+        { id: 2, estadoActual: 'En tránsito', total: 200 },
+        { id: 3, estadoActual: 'Entregado', total: 300 },
+        { id: 4, estadoActual: 'Aprobado', total: 400 },
+        { id: 5, estadoActual: 'Cancelado', total: 500 },
+        { id: 6, estadoActual: 'Procesando', total: 600 },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      expect(component.ordenesPendientes.length).toBe(1);
+      expect(component.ordenesEnTransito.length).toBe(1);
+      expect(component.ordenesEntregadas.length).toBe(1);
+      expect(component.enviosAprobados.length).toBe(1);
+      expect(component.enviosCancelados.length).toBe(1);
+      expect(component['filterByEstado']('Procesando').length).toBe(1);
+    });
+
+    it('resumenEstados should use filterByEstado for all status counts', () => {
+      const mockOrders: Orden[] = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+        { id: 3, estadoActual: 'Aprobado' },
+        { id: 4, estadoActual: 'Pendiente' },
+      ];
+      ordenesSubject.next(mockOrders);
+
+      const resumen = component.resumenEstados;
+      const pendienteResumen = resumen.find(r => r.estado === 'Pendiente');
+      const procesandoResumen = resumen.find(r => r.estado === 'Procesando');
+
+      expect(pendienteResumen?.cantidad).toBe(2);
+      expect(procesandoResumen?.cantidad).toBe(1);
+    });
+  });
 });

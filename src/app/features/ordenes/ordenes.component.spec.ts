@@ -115,6 +115,281 @@ describe('OrdenesComponent', () => {
     });
   });
 
+  describe('filterByEstado helper method', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should return all ordenes when estado is empty string', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+        { id: 3, estadoActual: 'Entregado' },
+      ];
+
+      const result = component.filterByEstado('');
+      expect(result.length).toBe(3);
+      expect(result).toEqual(component.ordenes);
+    });
+
+    it('should filter ordenes by specific estado', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+        { id: 3, estadoActual: 'Procesando' },
+        { id: 4, estadoActual: 'Entregado' },
+      ];
+
+      const result = component.filterByEstado('Procesando');
+      expect(result.length).toBe(2);
+      expect(result.every(o => o.estadoActual === 'Procesando')).toBe(true);
+    });
+
+    it('should return empty array when no ordenes match estado', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+      ];
+
+      const result = component.filterByEstado('NoExiste');
+      expect(result.length).toBe(0);
+    });
+
+    it('should handle null or undefined estado in ordenes', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: undefined },
+        { id: 3, estadoActual: 'Pendiente' },
+      ];
+
+      const result = component.filterByEstado('Pendiente');
+      expect(result.length).toBe(2);
+      expect(result.every(o => o.estadoActual === 'Pendiente')).toBe(true);
+    });
+
+    it('should handle empty ordenes array', () => {
+      component.ordenes = [];
+      const result = component.filterByEstado('Pendiente');
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('ordenesFiltradas getter', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should return all ordenes when filtroEstado is not set', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+      ];
+      component.filtroEstado = '';
+
+      expect(component.ordenesFiltradas.length).toBe(2);
+    });
+
+    it('should return filtered ordenes when filtroEstado is set', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+      ];
+      component.filtroEstado = 'Pendiente';
+
+      expect(component.ordenesFiltradas.length).toBe(1);
+      expect(component.ordenesFiltradas[0].estadoActual).toBe('Pendiente');
+    });
+
+    it('should update ordenesFiltradas when filtroEstado changes', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+        { id: 3, estadoActual: 'Entregado' },
+      ];
+
+      component.filtroEstado = 'Pendiente';
+      expect(component.ordenesFiltradas.length).toBe(1);
+
+      component.filtroEstado = 'Procesando';
+      expect(component.ordenesFiltradas.length).toBe(1);
+
+      component.filtroEstado = 'Entregado';
+      expect(component.ordenesFiltradas.length).toBe(1);
+    });
+
+    it('should handle multiple ordenes with same estado', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Pendiente' },
+        { id: 3, estadoActual: 'Pendiente' },
+      ];
+      component.filtroEstado = 'Pendiente';
+
+      expect(component.ordenesFiltradas.length).toBe(3);
+    });
+  });
+
+  describe('countByEstado method', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should count ordenes with specific estado', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+        { id: 3, estadoActual: 'Procesando' },
+      ];
+
+      expect(component.countByEstado('Pendiente')).toBe(1);
+      expect(component.countByEstado('Procesando')).toBe(2);
+    });
+
+    it('should return 0 when no ordenes match estado', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+      ];
+
+      expect(component.countByEstado('Entregado')).toBe(0);
+    });
+
+    it('should return 0 when ordenes array is empty', () => {
+      component.ordenes = [];
+      expect(component.countByEstado('Pendiente')).toBe(0);
+    });
+
+    it('should count all estados independently', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Pendiente' },
+        { id: 3, estadoActual: 'Procesando' },
+        { id: 4, estadoActual: 'Procesando' },
+        { id: 5, estadoActual: 'Procesando' },
+        { id: 6, estadoActual: 'Entregado' },
+      ];
+
+      expect(component.countByEstado('Pendiente')).toBe(2);
+      expect(component.countByEstado('Procesando')).toBe(3);
+      expect(component.countByEstado('Entregado')).toBe(1);
+      expect(component.countByEstado('Cancelado')).toBe(0);
+    });
+
+    it('should handle null or undefined estado in ordenes', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: undefined },
+        { id: 3, estadoActual: 'Pendiente' },
+      ];
+
+      expect(component.countByEstado('Pendiente')).toBe(2);
+      expect(component.countByEstado(undefined as any)).toBe(0);
+    });
+  });
+
+  describe('Form initialization', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should initialize historialForm with required fields', () => {
+      component.initHistorialForm();
+      expect(component.historialForm).toBeDefined();
+      expect(component.historialForm.get('estadoId')).toBeDefined();
+      expect(component.historialForm.get('comentario')).toBeDefined();
+    });
+
+    it('should have estadoId as required field', () => {
+      component.initHistorialForm();
+      const estadoIdControl = component.historialForm.get('estadoId');
+      expect(estadoIdControl?.hasError('required')).toBe(true);
+
+      estadoIdControl?.setValue('some-id');
+      expect(estadoIdControl?.hasError('required')).toBe(false);
+    });
+
+    it('should have comentario as optional field', () => {
+      component.initHistorialForm();
+      const comentarioControl = component.historialForm.get('comentario');
+      expect(comentarioControl?.valid).toBe(true);
+
+      comentarioControl?.setValue('');
+      expect(comentarioControl?.valid).toBe(true);
+    });
+
+    it('should mark form as invalid when required fields are empty', () => {
+      component.initHistorialForm();
+      expect(component.historialForm.valid).toBe(false);
+
+      component.historialForm.patchValue({ estadoId: 'some-id' });
+      expect(component.historialForm.valid).toBe(true);
+    });
+  });
+
+  describe('Edge cases', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should handle component with no ordenes', () => {
+      component.ordenes = [];
+      expect(component.ordenesFiltradas).toEqual([]);
+      expect(component.countByEstado('Pendiente')).toBe(0);
+    });
+
+    it('should handle estado filter with empty string and null ordenes', () => {
+      component.ordenes = [];
+      component.filtroEstado = '';
+      expect(component.ordenesFiltradas).toEqual([]);
+    });
+
+    it('should handle rapid estado filter changes', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+        { id: 3, estadoActual: 'Entregado' },
+      ];
+
+      component.filtroEstado = 'Pendiente';
+      expect(component.ordenesFiltradas.length).toBe(1);
+
+      component.filtroEstado = 'Procesando';
+      expect(component.ordenesFiltradas.length).toBe(1);
+
+      component.filtroEstado = 'Entregado';
+      expect(component.ordenesFiltradas.length).toBe(1);
+
+      component.filtroEstado = '';
+      expect(component.ordenesFiltradas.length).toBe(3);
+    });
+
+    it('should not modify original ordenes array when filtering', () => {
+      const originalOrdenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'Procesando' },
+      ];
+      component.ordenes = [...originalOrdenes];
+
+      component.filterByEstado('Pendiente');
+
+      expect(component.ordenes).toEqual(originalOrdenes);
+      expect(component.ordenes.length).toBe(2);
+    });
+
+    it('should handle estado names with different cases (case-sensitive)', () => {
+      component.ordenes = [
+        { id: 1, estadoActual: 'Pendiente' },
+        { id: 2, estadoActual: 'pendiente' },
+      ];
+
+      const result = component.filterByEstado('Pendiente');
+      expect(result.length).toBe(1);
+
+      const resultLower = component.filterByEstado('pendiente');
+      expect(resultLower.length).toBe(1);
+    });
+  });
+
   describe('New Order Flow', () => {
     beforeEach(() => {
       authServiceSpy.hasRole.mockImplementation((role: string) => role === 'cliente');
