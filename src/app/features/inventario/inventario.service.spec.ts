@@ -234,4 +234,148 @@ describe('InventarioService (Feature)', () => {
       await promise;
     });
   });
+
+  describe('Error handling (catchError) and not found conditions', () => {
+    // Bodegas
+    it('should handle getBodegas error', async () => {
+      const promise = firstValueFrom(service.getBodegas());
+      httpTestingController.expectOne(environment.services.inventarioBodegas).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle getBodegasActivas error', async () => {
+      const promise = firstValueFrom(service.getBodegasActivas());
+      httpTestingController.expectOne(`${environment.services.inventarioBodegas}/activas`).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle getBodegaById error', async () => {
+      const promise = firstValueFrom(service.getBodegaById(99));
+      httpTestingController.expectOne(`${environment.services.inventarioBodegas}/99`).error(new ProgressEvent('error'));
+      expect(await promise).toBeUndefined();
+    });
+
+    it('should handle createBodega error', async () => {
+      const promise = firstValueFrom(service.createBodega({ nombre: 'B1' }));
+      httpTestingController.expectOne(environment.services.inventarioBodegas).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle updateBodega error', async () => {
+      const promise = firstValueFrom(service.updateBodega(1, { nombre: 'B1' }));
+      httpTestingController.expectOne(`${environment.services.inventarioBodegas}/1`).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle deleteBodega error', async () => {
+      const promise = firstValueFrom(service.deleteBodega(1));
+      httpTestingController.expectOne(`${environment.services.inventarioBodegas}/1`).error(new ProgressEvent('error'));
+      await promise;
+    });
+
+    it('should handle toggleBodega not found or error', async () => {
+      // Not found
+      const promiseNotFound = firstValueFrom(service.toggleBodega(999));
+      expect(await promiseNotFound).toBeNull();
+
+      // Found but HTTP error
+      (service as any).bodegasSubject.next([{ idBodega: 1, nombre: 'B1', activa: true }]);
+      const promiseError = firstValueFrom(service.toggleBodega(1));
+      httpTestingController.expectOne(`${environment.services.inventarioBodegas}/1`).error(new ProgressEvent('error'));
+      expect(await promiseError).toBeNull();
+    });
+
+    // Pasillos
+    it('should handle getPasillos error', async () => {
+      const promise = firstValueFrom(service.getPasillos());
+      httpTestingController.expectOne(environment.services.inventarioPasillos).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle getPasillosByBodega error', async () => {
+      const promise = firstValueFrom(service.getPasillosByBodega(1));
+      httpTestingController.expectOne(`${environment.services.inventarioPasillos}/bodega/1`).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle createPasillo error', async () => {
+      const promise = firstValueFrom(service.createPasillo({ codigo: 'P1', idBodega: 1 }));
+      httpTestingController.expectOne(environment.services.inventarioPasillos).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle updatePasillo error', async () => {
+      const promise = firstValueFrom(service.updatePasillo(1, { codigo: 'P1', idBodega: 1 }));
+      httpTestingController.expectOne(`${environment.services.inventarioPasillos}/1`).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle togglePasillo not found or error', async () => {
+      // Not found
+      const promiseNotFound = firstValueFrom(service.togglePasillo(999));
+      expect(await promiseNotFound).toBeNull();
+
+      // Found but HTTP error
+      (service as any).pasillosSubject.next([{ idPasillo: 1, codigo: 'P1', idBodega: 1, activo: true }]);
+      const promiseError = firstValueFrom(service.togglePasillo(1));
+      httpTestingController.expectOne(`${environment.services.inventarioPasillos}/1`).error(new ProgressEvent('error'));
+      expect(await promiseError).toBeNull();
+    });
+
+    it('should handle deletePasillo error', async () => {
+      const promise = firstValueFrom(service.deletePasillo(1));
+      httpTestingController.expectOne(`${environment.services.inventarioPasillos}/1`).error(new ProgressEvent('error'));
+      await promise;
+    });
+
+    // Estantes
+    it('should handle getEstantes error', async () => {
+      const promise = firstValueFrom(service.getEstantes());
+      httpTestingController.expectOne(environment.services.inventarioEstantes).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle getEstantesByPasillo error', async () => {
+      const promise = firstValueFrom(service.getEstantesByPasillo(1));
+      httpTestingController.expectOne(`${environment.services.inventarioEstantes}/por-pasillo/1`).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle createEstante error', async () => {
+      const promise = firstValueFrom(service.createEstante({ codigo: 'E1', numNiveles: 1 }));
+      httpTestingController.expectOne(environment.services.inventarioEstantes).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle deleteEstante error', async () => {
+      const promise = firstValueFrom(service.deleteEstante(1));
+      httpTestingController.expectOne(`${environment.services.inventarioEstantes}/1`).error(new ProgressEvent('error'));
+      await promise;
+    });
+
+    // EstPasi
+    it('should handle getEstPasi error', async () => {
+      const promise = firstValueFrom(service.getEstPasi());
+      httpTestingController.expectOne(environment.services.inventarioEstPasi).error(new ProgressEvent('error'));
+      expect(await promise).toEqual([]);
+    });
+
+    it('should handle createEstPasi error', async () => {
+      const promise = firstValueFrom(service.createEstPasi({ idEstante: 1, idPasillo: 2 }));
+      httpTestingController.expectOne(environment.services.inventarioEstPasi).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle updateEstPasi error', async () => {
+      const promise = firstValueFrom(service.updateEstPasi(1, { idEstante: 1, idPasillo: 2 }));
+      httpTestingController.expectOne(`${environment.services.inventarioEstPasi}/1`).error(new ProgressEvent('error'));
+      expect(await promise).toBeNull();
+    });
+
+    it('should handle deleteEstPasi error', async () => {
+      const promise = firstValueFrom(service.deleteEstPasi(1));
+      httpTestingController.expectOne(`${environment.services.inventarioEstPasi}/1`).error(new ProgressEvent('error'));
+      await promise;
+    });
+  });
 });

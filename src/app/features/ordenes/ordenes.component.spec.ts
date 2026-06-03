@@ -8,7 +8,7 @@ import { EstadoOrdenService } from './estado.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ProductoService } from '../productos/producto.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { Orden, Estado, Producto } from '../../shared/models/models';
 import { environment } from '../../../environments/environment';
 
@@ -436,6 +436,276 @@ describe('OrdenesComponent', () => {
       component.confirmarPedido();
 
       expect(ordenServiceSpy.crearOrden).toHaveBeenCalled();
+    });
+
+    it('should not place order if cart is empty or processing', () => {
+      component.carrito = [];
+      component.direccionId = 'dir123';
+      component.confirmarPedido();
+      expect(ordenServiceSpy.crearOrden).not.toHaveBeenCalled();
+
+      component.carrito = [{ producto: { id: 'p1', precio: 10 } as any, cantidad: 1 }];
+      component.procesandoOrden = true;
+      component.confirmarPedido();
+      expect(ordenServiceSpy.crearOrden).not.toHaveBeenCalled();
+    });
+
+    it('should show toast error if confirming order with no address', () => {
+      component.carrito = [{ producto: { id: 'p1', precio: 10 } as any, cantidad: 1 }];
+      component.direccionId = null;
+      component.procesandoOrden = false;
+
+      component.confirmarPedido();
+
+      expect(toastSpy.error).toHaveBeenCalledWith('Sin dirección registrada', expect.any(String));
+      expect(ordenServiceSpy.crearOrden).not.toHaveBeenCalled();
+    });
+
+    it('should not place order if user is null', () => {
+      component.carrito = [{ producto: { id: 'p1', precio: 10 } as any, cantidad: 1 }];
+      component.direccionId = 'dir123';
+      authServiceSpy.getCurrentUser.mockReturnValue(null);
+
+      component.confirmarPedido();
+
+      expect(component.procesandoOrden).toBe(false);
+      expect(ordenServiceSpy.crearOrden).not.toHaveBeenCalled();
+    });
+
+    it('should handle HTTP error when placing order', () => {
+      ordenServiceSpy.crearOrden.mockReturnValue(throwError(() => new Error('API Error')));
+      component.carrito = [{ producto: { id: 'p1', precio: 10 } as any, cantidad: 1 }];
+      component.direccionId = 'dir123';
+
+      component.confirmarPedido();
+
+      expect(component.procesandoOrden).toBe(false);
+    });
+
+    it('should close new order modal', () => {
+      component.showNuevoPedido = true;
+      component.carrito = [{ producto: {} as any, cantidad: 1 }];
+      component.paisModal = 'Chile';
+
+      component.cerrarNuevoPedido();
+
+      expect(component.showNuevoPedido).toBe(false);
+      expect(component.carrito).toEqual([]);
+      expect(component.paisModal).toBe('');
+    });
+
+    it('should get unique sorted list of available countries in modal', () => {
+      component.productosDisponibles = [
+        { id: '1', nombre: 'P1', pais: 'Colombia', activo: true } as any,
+        { id: '2', nombre: 'P2', pais: 'Argentina', activo: true } as any,
+        { id: '3', nombre: 'P3', pais: null, activo: true } as any,
+      ];
+      expect(component.paisesDisponibles).toEqual(['Argentina', 'Chile', 'Colombia']);
+    });
+
+    it('should filter modal products by country', () => {
+      component.productosDisponibles = [
+        { id: '1', nombre: 'P1', pais: 'Chile' } as any,
+        { id: '2', nombre: 'P2', pais: 'Colombia' } as any,
+      ];
+      component.paisModal = 'Colombia';
+      expect(component.productosModalFiltrados.length).toBe(1);
+      expect(component.productosModalFiltrados[0].id).toBe('2');
+
+      component.paisModal = '';
+      expect(component.productosModalFiltrados.length).toBe(2);
+    });
+
+    it('should manage cart edge cases', () => {
+      const p1: Producto = { id: 'p1', nombre: 'P1', precio: 10, stock: 2, activo: true };
+      const p2: Producto = { id: 'p2', nombre: 'P2', precio: 20, stock: 10, activo: true };
+
+      component.carrito = [];
+      component.agregarAlCarrito(p1);
+      component.agregarAlCarrito(p1);
+      component.agregarAlCarrito(p1); // should not exceed stock of 2
+      expect(component.getCantidad('p1')).toBe(2);
+
+      component.quitarDelCarrito(p2); // removing non-existing item
+      expect(component.carrito.length).toBe(1);
+
+      component.quitarDelCarrito(p1); // qty 2 -> 1
+      expect(component.getCantidad('p1')).toBe(1);
+
+      component.quitarDelCarrito(p1); // qty 1 -> 0, item removed
+      expect(component.getCantidad('p1')).toBe(0);
+      expect(component.carrito.length).toBe(0);
+    });
+  });
+
+  describe('Historial and Actions', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should open and close historial modal', () => {
+      const o: Orden = { id: 1 };
+      component.openHistorial(o);
+      expect(component.ordenDetalle).toEqual(o);
+      expect(component.showHistorialModal).toBe(true);
+
+      component.closeHistorial();
+      expect(component.showHistorialModal).toBe(false);
+    });
+
+    it('should submit new history entry', () => {
+      const o: Orden = { id: 1 };
+      component.estadosDisponibles = [{ id: 'est1', nombre: 'Procesando' }];
+      component.openHistorial(o);
+      component.historialForm.patchValue({ estadoId: 'est1', comentario: 'Processing order' });
+
+      component.onSubmitHistorial();
+
+      expect(ordenServiceSpy.agregarHistorial).toHaveBeenCalledWith(1, {
+        estadoId: 'est1',
+        estadoNombre: 'Procesando',
+        comentario: 'Processing order'
+      });
+      expect(component.showHistorialModal).toBe(false);
+    });
+
+    it('should fallback to ID if state name not found on history submit', () => {
+      const o: Orden = { id: 1 };
+      component.estadosDisponibles = [];
+      component.openHistorial(o);
+      component.historialForm.patchValue({ estadoId: 'unknown-id', comentario: '' });
+
+      component.onSubmitHistorial();
+
+      expect(ordenServiceSpy.agregarHistorial).toHaveBeenCalledWith(1, {
+        estadoId: 'unknown-id',
+        estadoNombre: 'unknown-id',
+        comentario: ''
+      });
+    });
+
+    it('should not submit history if form is invalid or no order selected', () => {
+      component.ordenDetalle = null;
+      component.onSubmitHistorial();
+      expect(ordenServiceSpy.agregarHistorial).not.toHaveBeenCalled();
+    });
+
+    it('should cancel order if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.estadosDisponibles = [{ id: 'est6', nombre: 'Cancelado' }];
+      const o: Orden = { id: 123 };
+
+      component.cancelarOrden(o);
+
+      expect(ordenServiceSpy.agregarHistorial).toHaveBeenCalledWith(123, {
+        estadoId: 'est6',
+        estadoNombre: 'Cancelado',
+        comentario: 'Cancelado por el cliente'
+      });
+      expect(toastSpy.success).toHaveBeenCalledWith('Orden cancelada', expect.any(String));
+      expect(ordenServiceSpy.getMisOrdenes).toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should handle HTTP error when cancelling order', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      ordenServiceSpy.agregarHistorial.mockReturnValue(throwError(() => new Error('Error')));
+      const o: Orden = { id: 123 };
+
+      component.cancelarOrden(o);
+
+      expect(ordenServiceSpy.getMisOrdenes).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should not cancel order if confirm is rejected', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      const o: Orden = { id: 123 };
+      component.cancelarOrden(o);
+      expect(ordenServiceSpy.agregarHistorial).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should confirm delivery if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.estadosDisponibles = [{ id: 'est5', nombre: 'Entregado' }];
+      const o: Orden = { id: 456 };
+
+      component.confirmarEntrega(o);
+
+      expect(ordenServiceSpy.agregarHistorial).toHaveBeenCalledWith(456, {
+        estadoId: 'est5',
+        estadoNombre: 'Entregado',
+        comentario: 'Entrega confirmada por el cliente'
+      });
+      expect(toastSpy.success).toHaveBeenCalledWith('¡Recibo confirmado!', expect.any(String));
+      expect(ordenServiceSpy.getMisOrdenes).toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should handle HTTP error when confirming delivery', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      ordenServiceSpy.agregarHistorial.mockReturnValue(throwError(() => new Error('Error')));
+      const o: Orden = { id: 456 };
+
+      component.confirmarEntrega(o);
+
+      expect(ordenServiceSpy.getMisOrdenes).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should not confirm delivery if confirm is rejected', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      const o: Orden = { id: 456 };
+      component.confirmarEntrega(o);
+      expect(ordenServiceSpy.agregarHistorial).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should check canCancel conditions', () => {
+      authServiceSpy.hasRole.mockImplementation((role: string) => role === 'cliente');
+
+      const p: Orden = { id: 1, estadoActual: 'Pendiente' };
+      const pr: Orden = { id: 2, estadoActual: 'Procesando' };
+      const del: Orden = { id: 3, estadoActual: 'Entregado' };
+
+      expect(component.puedeCanCelar(p)).toBe(true);
+      expect(component.puedeCanCelar(pr)).toBe(true);
+      expect(component.puedeCanCelar(del)).toBe(false);
+
+      authServiceSpy.hasRole.mockReturnValue(false);
+      expect(component.puedeCanCelar(p)).toBe(false);
+    });
+
+    it('should check puedeConfirmar conditions', () => {
+      authServiceSpy.hasRole.mockImplementation((role: string) => role === 'cliente');
+
+      const delNotConfirmed: Orden = { id: 1, estadoActual: 'Entregado', historial: [] };
+      const delConfirmed: Orden = { id: 2, estadoActual: 'Entregado', historial: [{ comentario: 'Entrega confirmada por el cliente' }] };
+      const pr: Orden = { id: 3, estadoActual: 'Procesando' };
+
+      expect(component.puedeConfirmar(delNotConfirmed)).toBe(true);
+      expect(component.puedeConfirmar(delConfirmed)).toBe(false);
+      expect(component.puedeConfirmar(pr)).toBe(false);
+
+      authServiceSpy.hasRole.mockReturnValue(false);
+      expect(component.puedeConfirmar(delNotConfirmed)).toBe(false);
+    });
+
+    it('should fetch all orders if user is not a client', () => {
+      authServiceSpy.hasRole.mockImplementation((role: string) => role !== 'cliente');
+      component.ngOnInit();
+      expect(ordenServiceSpy.getAll).toHaveBeenCalled();
+    });
+
+    it('should use local helpers and getters', () => {
+      component.estadosDisponibles = [{ id: '1', nombre: 'Aprobado' }];
+      expect(component.estadoNombres).toEqual(['Aprobado']);
+      expect(component.getEstadoBadge('Pendiente')).toContain('yellow');
+      expect(component.formatCurrency(100)).toContain('100');
+      expect(component.formatDate('2026-06-03T10:00:00Z')).toContain('2026');
+      expect(component.getHistorial({ id: 1, historial: [{ id: 'h1' }] as any })).toEqual([{ id: 'h1' }]);
+      expect(component.esBodeguero).toBe(false);
     });
   });
 });

@@ -107,5 +107,79 @@ describe('PerfilComponent', () => {
     expect(component.getIniciales({ nombre: 'John', apellido: 'Doe', id: '1', correo: 'a' })).toBe('JD');
     expect(component.getRolBadge('admin')).toBe('bg-red-100 text-red-800');
     expect(component.getRolBadge('unknown')).toBe('bg-gray-100 text-gray-600');
+    expect(component.getIniciales(null)).toBe('?');
+  });
+
+  it('should prefill address on init if user has address', () => {
+    fixture.detectChanges();
+    httpTestingController.expectOne(environment.services.regiones).flush([]);
+
+    const reqUser = httpTestingController.expectOne(`${environment.services.usuarios}/me`);
+    const mockUser: Usuario = {
+      id: '1', nombre: 'John', correo: 'a',
+      direccion: {
+        id: 'dir123', calle: 'Street', numero: '100', codigoPostal: '90',
+        comuna: { id: 'com1', nombre: 'C', region: { id: 'reg1', nombre: 'R' } }
+      }
+    };
+    reqUser.flush(mockUser);
+
+    const reqComunas = httpTestingController.expectOne(`${environment.services.comunas}/por-region/reg1`);
+    reqComunas.flush([{ id: 'com1', nombre: 'C' }]);
+
+    expect(component.form.value.calle).toBe('Street');
+    expect(component.form.value.comunaId).toBe('com1');
+  });
+
+  it('should handle API errors on onSubmit', () => {
+    fixture.detectChanges();
+    httpTestingController.expectOne(environment.services.regiones).flush([]);
+    httpTestingController.expectOne(`${environment.services.usuarios}/me`).flush({ id: '1' });
+
+    component.form.setValue({
+      regionId: 'reg1',
+      comunaId: 'com1',
+      calle: 'Street',
+      numero: '100',
+      codigoPostal: '90'
+    });
+
+    component.onSubmit();
+
+    const reqPostDir = httpTestingController.expectOne(environment.services.direcciones);
+    reqPostDir.error(new ProgressEvent('error')); // create address fails
+
+    expect(component.guardando).toBe(false);
+    expect(component.guardadoExitoso).toBe(false);
+  });
+
+  it('should reset guardadoExitoso flag after 4 seconds', () => {
+    vi.useFakeTimers();
+    fixture.detectChanges();
+    httpTestingController.expectOne(environment.services.regiones).flush([]);
+    httpTestingController.expectOne(`${environment.services.usuarios}/me`).flush({ id: '1' });
+
+    component.form.setValue({
+      regionId: 'reg1',
+      comunaId: 'com1',
+      calle: 'Street',
+      numero: '100',
+      codigoPostal: '90'
+    });
+
+    component.onSubmit();
+
+    const reqPostDir = httpTestingController.expectOne(environment.services.direcciones);
+    reqPostDir.flush({ id: 'dir123' });
+
+    const reqPutUser = httpTestingController.expectOne(`${environment.services.usuarios}/me`);
+    reqPutUser.flush({ id: '1', direccion: { id: 'dir123' } });
+
+    expect(component.guardadoExitoso).toBe(true);
+
+    vi.advanceTimersByTime(4000);
+    expect(component.guardadoExitoso).toBe(false);
+
+    vi.useRealTimers();
   });
 });

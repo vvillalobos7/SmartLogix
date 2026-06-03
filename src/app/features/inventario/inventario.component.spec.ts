@@ -144,5 +144,92 @@ describe('InventarioComponent', () => {
       expect(inventarioServiceSpy.createEstante).toHaveBeenCalled();
       expect(inventarioServiceSpy.createEstPasiLink).toHaveBeenCalledWith(123, 5);
     });
+
+    it('should handle edit estPasi modal and submission', () => {
+      const ep = { idEstPasi: 1, idEstante: 10, idPasillo: 20, posicion: 'A', ocupacionPct: 50, habilitada: true, observaciones: 'none' };
+      component.openEditEstPasi(ep);
+      expect(component.editingEstPasi).toEqual(ep);
+      expect(component.modalTipo).toBe('editEstPasi');
+      expect(component.editEstPasiForm.value.posicion).toBe('A');
+
+      component.editEstPasiForm.patchValue({ posicion: 'B', ocupacionPct: 60, habilitada: false, observaciones: 'dirty' });
+      component.onSubmitEditEstPasi();
+
+      expect(inventarioServiceSpy.updateEstPasi).toHaveBeenCalledWith(1, {
+        idEstante: 10,
+        idPasillo: 20,
+        posicion: 'B',
+        ocupacionPct: 60,
+        habilitada: false,
+        observaciones: 'dirty'
+      });
+      expect(component.showModal).toBe(false);
+    });
+
+    it('should handle edit pasillo modal and submission', () => {
+      const p = { idPasillo: 2, codigo: 'P2', descripcion: 'desc', numeroOrden: 3, idBodega: 4, activo: true };
+      component.openEditPasillo(p);
+      expect(component.editingPasillo).toEqual(p);
+      expect(component.modalTipo).toBe('editPasillo');
+      expect(component.editPasilloForm.value.descripcion).toBe('desc');
+
+      component.editPasilloForm.patchValue({ descripcion: 'modified' });
+      component.onSubmitEditPasillo();
+
+      expect(inventarioServiceSpy.updatePasillo).toHaveBeenCalledWith(2, {
+        codigo: 'P2',
+        descripcion: 'modified',
+        numeroOrden: 3,
+        idBodega: 4,
+        activo: true
+      });
+      expect(component.showModal).toBe(false);
+    });
+
+    it('should delete bodega if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.deleteBodega(1);
+      expect(inventarioServiceSpy.deleteBodega).toHaveBeenCalledWith(1);
+      confirmSpy.mockRestore();
+    });
+
+    it('should delete pasillo if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.deletePasillo(2);
+      expect(inventarioServiceSpy.deletePasillo).toHaveBeenCalledWith(2);
+      confirmSpy.mockRestore();
+    });
+
+    it('should delete estPasi link if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.deleteEstPasi(3);
+      expect(inventarioServiceSpy.deleteEstPasi).toHaveBeenCalledWith(3);
+      confirmSpy.mockRestore();
+    });
+
+    it('should toggle bodega active state', () => {
+      component.toggleBodega({ idBodega: 1, nombre: 'B1', activa: true });
+      expect(inventarioServiceSpy.toggleBodega).toHaveBeenCalledWith(1);
+
+      inventarioServiceSpy.toggleBodega.mockClear();
+      component.toggleBodega({ idBodega: undefined } as any);
+      expect(inventarioServiceSpy.toggleBodega).not.toHaveBeenCalled();
+    });
+
+    it('should handle ngOnInit subscription mappings', () => {
+      bodegasSubject.next([{ idBodega: 100, nombre: 'B100', activa: true }]);
+      pasillosSubject.next([{ idPasillo: 200, codigo: 'P200', idBodega: 100 }]);
+      estantesSubject.next([{ idEstante: 300, codigo: 'E300' }]);
+      estPasiSubject.next([{ idEstPasi: 400, idEstante: 300, idPasillo: 200 }]);
+
+      fixture.detectChanges();
+
+      expect(component.bodegas.length).toBe(1);
+      expect(component.pasillos.length).toBe(1);
+      expect(component.estantes.length).toBe(1);
+      expect(component.estPasiList.length).toBe(1);
+      expect(component.isBodegaExpanded(100)).toBe(true);
+      expect(component.isPasilloExpanded(200)).toBe(true);
+    });
   });
 });

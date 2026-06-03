@@ -113,4 +113,107 @@ describe('OrdenService (Feature)', () => {
     const order = await promise;
     expect(order.estadoActual).toBe('aprobado'); // tap no transforma el valor devuelto
   });
+
+  describe('Error handling (catchError) and custom normalization', () => {
+    it('should return empty list and clear subject on getAll error', async () => {
+      service.getSnapshot().push({ id: 1 }); // seed subject
+      const promise = firstValueFrom(service.getAll());
+      const req = httpTestingController.expectOne(environment.services.ordenes);
+      req.error(new ProgressEvent('error'));
+
+      const res = await promise;
+      expect(res).toEqual([]);
+      expect(service.getSnapshot()).toEqual([]);
+    });
+
+    it('should return empty list and clear subject on getMisOrdenes error', async () => {
+      service.getSnapshot().push({ id: 1 }); // seed subject
+      const promise = firstValueFrom(service.getMisOrdenes());
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/mis-ordenes`);
+      req.error(new ProgressEvent('error'));
+
+      const res = await promise;
+      expect(res).toEqual([]);
+      expect(service.getSnapshot()).toEqual([]);
+    });
+
+    it('should throw error on getById error', async () => {
+      const promise = firstValueFrom(service.getById(99));
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/99`);
+      req.error(new ProgressEvent('error'), { status: 404 });
+
+      await expect(promise).rejects.toThrow('Orden 99 no encontrada');
+    });
+
+    it('should throw error on crearOrden error', async () => {
+      const promise = firstValueFrom(service.crearOrden({ detalles: [] }));
+      const req = httpTestingController.expectOne(environment.services.ordenes);
+      req.error(new ProgressEvent('error'), { status: 400 });
+
+      await expect(promise).rejects.toBeDefined();
+    });
+
+    it('should get order history (getHistorial) success path', async () => {
+      const mockHistory = [{ id: '1', estadoNombre: 'Pendiente', fecha: '2026-06-03' }];
+      const promise = firstValueFrom(service.getHistorial(1));
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/1/historial`);
+      req.flush(mockHistory);
+
+      const res = await promise;
+      expect(res).toEqual(mockHistory);
+    });
+
+    it('should return empty array on getHistorial error', async () => {
+      const promise = firstValueFrom(service.getHistorial(1));
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/1/historial`);
+      req.error(new ProgressEvent('error'));
+
+      const res = await promise;
+      expect(res).toEqual([]);
+    });
+
+    it('should throw error on agregarHistorial error', async () => {
+      const promise = firstValueFrom(service.agregarHistorial(1, { estadoId: '1', estadoNombre: 'A', comentario: '' }));
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/1/historial`);
+      req.error(new ProgressEvent('error'));
+
+      await expect(promise).rejects.toBeDefined();
+    });
+
+    it('should throw error on tomarOrden error', async () => {
+      const promise = firstValueFrom(service.tomarOrden(1));
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/1/tomar`);
+      req.error(new ProgressEvent('error'));
+
+      await expect(promise).rejects.toBeDefined();
+    });
+
+    it('should throw error on liberarOrden error', async () => {
+      const promise = firstValueFrom(service.liberarOrden(1));
+      const req = httpTestingController.expectOne(`${environment.services.ordenes}/1/liberar`);
+      req.error(new ProgressEvent('error'));
+
+      await expect(promise).rejects.toBeDefined();
+    });
+
+    it('should calculate total from details if missing in normalizeOrden and retain original state if unmapped', async () => {
+      const raw: Orden = {
+        id: 1,
+        estadoActual: 'DESCONOCIDO',
+        detalles: [
+          { productoId: 'p1', cantidad: 3, precioUnitario: 100 } // subtotal missing, total missing
+        ]
+      };
+
+      const promise = firstValueFrom(service.getAll());
+      const req = httpTestingController.expectOne(environment.services.ordenes);
+      req.flush([raw]);
+
+      await promise;
+      const snap = service.getSnapshot()[0];
+      expect(snap.estadoActual).toBe('DESCONOCIDO'); // retain
+      expect(snap.total).toBe(300); // calculated
+      expect(snap.detalles?.[0].subtotal).toBe(300); // populated
+    });
+  });
 });

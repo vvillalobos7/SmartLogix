@@ -3,7 +3,7 @@ import { ProductosComponent } from './productos.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProductoService } from './producto.service';
 import { InventarioService } from '../inventario/inventario.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { Producto, Categoria, Bodega, Pasillo, Estante } from '../../shared/models/models';
 
 describe('ProductosComponent', () => {
@@ -161,6 +161,216 @@ describe('ProductosComponent', () => {
       expect(component.countProductosByCategoria('cat1')).toBe(2);
       expect(component.countProductosByCategoria('cat2')).toBe(1);
       expect(component.countProductosByCategoria('cat_empty')).toBe(0);
+    });
+
+    it('should delete category if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.deleteCategoria('cat1');
+      expect(productoServiceSpy.deleteCategoria).toHaveBeenCalledWith('cat1');
+      confirmSpy.mockRestore();
+    });
+
+    it('should not delete category if rejected', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      component.deleteCategoria('cat1');
+      expect(productoServiceSpy.deleteCategoria).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should open new and edit category modals', () => {
+      component.openNewCategoria();
+      expect(component.showCategoriaModal).toBe(true);
+      expect(component.categoriaEditando).toBeNull();
+
+      component.closeCategoriaModal();
+      expect(component.showCategoriaModal).toBe(false);
+
+      const c: Categoria = { id: 'c1', nombre: 'Cat1', descripcion: 'desc' };
+      component.openEditCategoria(c);
+      expect(component.showCategoriaModal).toBe(true);
+      expect(component.categoriaEditando).toEqual(c);
+      expect(component.categoriaForm.value.nombre).toBe('Cat1');
+    });
+
+    it('should submit category form', () => {
+      component.openNewCategoria();
+      component.categoriaForm.patchValue({ nombre: 'NewCat', descripcion: 'NewDesc' });
+      component.onSubmitCategoria();
+      expect(productoServiceSpy.createCategoria).toHaveBeenCalledWith({ nombre: 'NewCat', descripcion: 'NewDesc' });
+
+      const c: Categoria = { id: 'c1', nombre: 'Cat1' };
+      component.openEditCategoria(c);
+      component.categoriaForm.patchValue({ nombre: 'Cat1Mod', descripcion: '' });
+      component.onSubmitCategoria();
+      expect(productoServiceSpy.updateCategoria).toHaveBeenCalledWith('c1', { nombre: 'Cat1Mod', descripcion: undefined });
+    });
+
+    it('should not submit category form if invalid', () => {
+      component.openNewCategoria();
+      component.categoriaForm.patchValue({ nombre: '' }); // required
+      component.onSubmitCategoria();
+      expect(productoServiceSpy.createCategoria).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Location and Dropdowns', () => {
+    it('should handle onBodegaChange', () => {
+      component.openNew();
+      component.form.patchValue({ idBodega: 12 });
+      component.onBodegaChange();
+      expect(inventarioServiceSpy.getPasillosByBodega).toHaveBeenCalledWith(12);
+
+      component.form.patchValue({ idBodega: null });
+      component.onBodegaChange();
+      expect(component.pasillosFiltrados).toEqual([]);
+    });
+
+    it('should handle onPasilloChange', () => {
+      component.openNew();
+      component.form.patchValue({ idPasillo: 34 });
+      component.onPasilloChange();
+      expect(inventarioServiceSpy.getEstantesByPasillo).toHaveBeenCalledWith(34);
+
+      component.form.patchValue({ idPasillo: null });
+      component.onPasilloChange();
+      expect(component.estantesFiltrados).toEqual([]);
+    });
+
+    it('should return location formatting (getUbicacion)', () => {
+      component.bodegas = [{ idBodega: 1, nombre: 'Bodega Central', activa: true }];
+      component.allPasillos = [{ idPasillo: 10, codigo: 'Pasillo A', idBodega: 1 }];
+      component.allEstantes = [{ idEstante: 100, codigo: 'Estante 5' }];
+
+      const p1: Producto = { id: '1', nombre: 'P1', precio: 1, stock: 1, categoriaId: 'c1', activo: true };
+      const p2: Producto = { id: '2', nombre: 'P2', precio: 1, stock: 1, categoriaId: 'c1', idBodega: 1, activo: true };
+      const p3: Producto = { id: '3', nombre: 'P3', precio: 1, stock: 1, categoriaId: 'c1', idBodega: 1, idPasillo: 10, activo: true };
+      const p4: Producto = { id: '4', nombre: 'P4', precio: 1, stock: 1, categoriaId: 'c1', idBodega: 1, idPasillo: 10, idEstante: 100, activo: true };
+
+      expect(component.getUbicacion(p1)).toBe('—');
+      expect(component.getUbicacion(p2)).toBe('Bodega Central');
+      expect(component.getUbicacion(p3)).toBe('Bodega Central › Pasillo A');
+      expect(component.getUbicacion(p4)).toBe('Bodega Central › Pasillo A › Estante 5');
+
+      // Fallback names
+      const p5: Producto = { id: '5', nombre: 'P5', precio: 1, stock: 1, categoriaId: 'c1', idBodega: 99, idPasillo: 99, idEstante: 99, activo: true };
+      expect(component.getUbicacion(p5)).toBe('B99 › P99 › E99');
+    });
+  });
+
+  describe('Image Operations', () => {
+    it('should open and close image modal', () => {
+      const p: Producto = { id: '1', nombre: 'P1', precio: 1, stock: 1, categoriaId: 'c1', imagenUrl: 'img.jpg', activo: true };
+      component.abrirImagenModal(p);
+      expect(component.productoImagenId).toBe('1');
+      expect(component.imagenPreview).toBe('img.jpg');
+      expect(component.showImagenModal).toBe(true);
+
+      component.cerrarImagenModal();
+      expect(component.showImagenModal).toBe(false);
+      expect(component.productoImagenId).toBeNull();
+      expect(component.imagenFile).toBeNull();
+      expect(component.imagenPreview).toBeNull();
+    });
+
+    it('should handle image selection and validations', () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      // Invalid type
+      const eventInvalidType = { target: { files: [new File([], 'test.txt', { type: 'text/plain' })] } } as any;
+      component.onImagenSeleccionada(eventInvalidType);
+      expect(alertSpy).toHaveBeenCalledWith('Solo se permiten archivos de imagen.');
+
+      // Oversized file (6 MB)
+      const oversizedFile = new File([new ArrayBuffer(6 * 1024 * 1024)], 'test.png', { type: 'image/png' });
+      const eventOversized = { target: { files: [oversizedFile] } } as any;
+      component.onImagenSeleccionada(eventOversized);
+      expect(alertSpy).toHaveBeenCalledWith('La imagen no puede superar 5 MB.');
+
+      // Valid file
+      const validFile = new File([], 'test.png', { type: 'image/png' });
+      const eventValid = { target: { files: [validFile] } } as any;
+      component.onImagenSeleccionada(eventValid);
+      expect(component.imagenFile).toBe(validFile);
+
+      alertSpy.mockRestore();
+    });
+
+    it('should upload image successfully', () => {
+      const file = new File([], 'img.png');
+      component.productoImagenId = '1';
+      component.imagenFile = file;
+      component.subirImagen();
+      expect(component.subiendoImagen).toBe(false);
+      expect(component.showImagenModal).toBe(false);
+      expect(productoServiceSpy.subirImagen).toHaveBeenCalledWith('1', file);
+    });
+
+    it('should handle image upload error', () => {
+      productoServiceSpy.subirImagen.mockReturnValue(throwError(() => new Error('Error uploading')));
+      component.productoImagenId = '1';
+      component.imagenFile = new File([], 'img.png');
+      component.subirImagen();
+      expect(component.subiendoImagen).toBe(false);
+    });
+
+    it('should delete product image if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.eliminarImagen('1');
+      expect(productoServiceSpy.eliminarImagen).toHaveBeenCalledWith('1');
+      confirmSpy.mockRestore();
+    });
+
+    it('should not delete product image if rejected', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      component.eliminarImagen('1');
+      expect(productoServiceSpy.eliminarImagen).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it('should delete product if confirmed', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.onDelete('1');
+      expect(productoServiceSpy.delete).toHaveBeenCalledWith('1');
+      confirmSpy.mockRestore();
+    });
+
+    it('should not delete product if rejected', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      component.onDelete('1');
+      expect(productoServiceSpy.delete).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+  });
+
+  describe('Filters and Helpers', () => {
+    it('should get unique sorted list of countries', () => {
+      component.productos = [
+        { id: '1', nombre: 'P1', precio: 1, stock: 1, categoriaId: 'c1', pais: 'Colombia', activo: true },
+        { id: '2', nombre: 'P2', precio: 1, stock: 1, categoriaId: 'c1', pais: 'Argentina', activo: true },
+        { id: '3', nombre: 'P3', precio: 1, stock: 1, categoriaId: 'c1', pais: 'Colombia', activo: true },
+        { id: '4', nombre: 'P4', precio: 1, stock: 1, categoriaId: 'c1', pais: null as any, activo: true },
+      ];
+      expect(component.paisesList).toEqual(['Argentina', 'Chile', 'Colombia']); // Chile is fallback for null
+    });
+
+    it('should filter by country and bodega', () => {
+      component.productos = [
+        { id: '1', nombre: 'P1', precio: 1, stock: 1, categoriaId: 'c1', pais: 'Chile', idBodega: 1, activo: true },
+        { id: '2', nombre: 'P2', precio: 1, stock: 1, categoriaId: 'c1', pais: 'Colombia', idBodega: 2, activo: true },
+      ];
+
+      component.filtroPais = 'Colombia';
+      expect(component.productosFiltrados.length).toBe(1);
+      expect(component.productosFiltrados[0].id).toBe('2');
+
+      component.filtroPais = '';
+      component.filtroBodegaId = 1;
+      expect(component.productosFiltrados.length).toBe(1);
+      expect(component.productosFiltrados[0].id).toBe('1');
+    });
+
+    it('should format currency properly', () => {
+      expect(component.formatCurrency(12500)).toContain('12.500');
     });
   });
 });
