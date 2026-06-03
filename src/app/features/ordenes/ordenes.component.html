@@ -65,7 +65,7 @@
         </thead>
         <tbody class="divide-y divide-gray-50">
           @for (o of ordenesFiltradas; track o.id) {
-            <tr class="hover:bg-violet-50/30 transition-colors cursor-pointer" (click)="openDetalle(o)">
+            <tr class="hover:bg-violet-50/30 transition-colors cursor-pointer" (click)="openDetalle(o)" (keydown.enter)="openDetalle(o)" tabindex="0" role="row">
               <td class="px-4 py-3.5 font-mono font-bold text-xs text-violet-700 bg-violet-50/40">#{{ o.id }}</td>
               <td class="px-4 py-3">
                 @if (!esBodeguero && o.userNombre) {
@@ -80,7 +80,7 @@
                 </span>
               </td>
               <td class="px-4 py-3 text-right font-mono text-xs font-bold text-gray-800">{{ formatCurrency(o.total ?? 0) }}</td>
-              <td class="px-4 py-3" (click)="$event.stopPropagation()">
+              <td class="px-4 py-3" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
                 <div class="flex gap-1.5 justify-end">
                   <!-- Acciones para cliente -->
                   @if (puedeCanCelar(o)) {

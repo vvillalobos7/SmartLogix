@@ -113,8 +113,8 @@
       </div>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="px-6 py-5 space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Rol *</label>
-          <select formControlName="rolNombre" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+          <label for="usuario-rol" class="block text-xs font-semibold text-gray-600 mb-1">Rol *</label>
+          <select id="usuario-rol" formControlName="rolNombre" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             <option value="">Seleccionar...</option>
             @for (r of roles; track r.id) {
               <option [value]="r.nombre" class="capitalize">{{ r.nombre }}</option>

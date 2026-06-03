@@ -276,7 +276,7 @@
 
         <!-- Imagen del producto -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-2">Imagen <span class="font-normal text-gray-400">(opcional)</span></label>
+          <label for="prod-imagen" class="block text-xs font-semibold text-gray-600 mb-2">Imagen <span class="font-normal text-gray-400">(opcional)</span></label>
           <div class="flex items-center gap-3">
             <div class="w-16 h-16 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0">
               @if (imagenPreview) {
@@ -289,7 +289,7 @@
               }
             </div>
             <div class="flex-1">
-              <input type="file" accept="image/*" (change)="onImagenSeleccionada($event)"
+              <input id="prod-imagen" type="file" accept="image/*" (change)="onImagenSeleccionada($event)"
                 class="w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
               <p class="text-xs text-gray-400 mt-1">PNG, JPG o WebP · Máx. 5 MB</p>
             </div>
@@ -297,8 +297,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
-          <input formControlName="nombre"
+          <label for="prod-nombre" class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
+          <input id="prod-nombre" formControlName="nombre"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
             placeholder="Nombre completo del producto">
           @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
@@ -307,28 +307,28 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
-          <textarea formControlName="descripcion" rows="2"
+          <label for="prod-descripcion" class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+          <textarea id="prod-descripcion" formControlName="descripcion" rows="2"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 resize-none"
             placeholder="Descripción del producto"></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Precio *</label>
-            <input formControlName="precio" type="number" min="1"
+            <label for="prod-precio" class="block text-xs font-semibold text-gray-600 mb-1">Precio *</label>
+            <input id="prod-precio" formControlName="precio" type="number" min="1"
               class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Stock *</label>
-            <input formControlName="stock" type="number" min="0"
+            <label for="prod-stock" class="block text-xs font-semibold text-gray-600 mb-1">Stock *</label>
+            <input id="prod-stock" formControlName="stock" type="number" min="0"
               class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría *</label>
-          <select formControlName="categoriaId"
+          <label for="prod-categoria" class="block text-xs font-semibold text-gray-600 mb-1">Categoría *</label>
+          <select id="prod-categoria" formControlName="categoriaId"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             <option value="">Seleccionar categoría...</option>
             @for (c of categorias; track c.id) {
@@ -341,8 +341,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">País de origen</label>
-          <select formControlName="pais"
+          <label for="prod-pais" class="block text-xs font-semibold text-gray-600 mb-1">País de origen</label>
+          <select id="prod-pais" formControlName="pais"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             <option value="Chile">Chile</option>
             <option value="Colombia">Colombia</option>
@@ -361,8 +361,8 @@
           <p class="text-xs font-semibold text-gray-600">Ubicación en bodega <span class="font-normal text-gray-400">(opcional)</span></p>
           <div class="grid grid-cols-3 gap-2">
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Bodega</label>
-              <select formControlName="idBodega" (change)="onBodegaChange()"
+              <label for="prod-bodega" class="block text-xs text-gray-500 mb-1">Bodega</label>
+              <select id="prod-bodega" formControlName="idBodega" (change)="onBodegaChange()"
                 class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
                 <option [value]="null">—</option>
                 @for (b of bodegas; track b.idBodega) {
@@ -371,8 +371,8 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Pasillo</label>
-              <select formControlName="idPasillo" (change)="onPasilloChange()"
+              <label for="prod-pasillo" class="block text-xs text-gray-500 mb-1">Pasillo</label>
+              <select id="prod-pasillo" formControlName="idPasillo" (change)="onPasilloChange()"
                 [disabled]="pasillosFiltrados.length === 0"
                 class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white disabled:opacity-50">
                 <option [value]="null">—</option>
@@ -382,8 +382,8 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Estante</label>
-              <select formControlName="idEstante"
+              <label for="prod-estante" class="block text-xs text-gray-500 mb-1">Estante</label>
+              <select id="prod-estante" formControlName="idEstante"
                 [disabled]="estantesFiltrados.length === 0"
                 class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white disabled:opacity-50">
                 <option [value]="null">—</option>
@@ -449,8 +449,8 @@
 
         <!-- Input archivo -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-2">Seleccionar imagen</label>
-          <input type="file" accept="image/*" (change)="onImagenSeleccionada($event)"
+          <label for="prod-img-file" class="block text-xs font-semibold text-gray-600 mb-2">Seleccionar imagen</label>
+          <input id="prod-img-file" type="file" accept="image/*" (change)="onImagenSeleccionada($event)"
             class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
           <p class="text-xs text-gray-400 mt-1">PNG, JPG o WebP · Máx. 5 MB</p>
         </div>
@@ -498,8 +498,8 @@
 
       <form [formGroup]="categoriaForm" (ngSubmit)="onSubmitCategoria()" class="px-6 py-5 space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
-          <input formControlName="nombre"
+          <label for="cat-nombre" class="block text-xs font-semibold text-gray-600 mb-1">Nombre *</label>
+          <input id="cat-nombre" formControlName="nombre"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
             placeholder="Ej: Electrónica">
           @if (categoriaForm.get('nombre')?.invalid && categoriaForm.get('nombre')?.touched) {
@@ -507,8 +507,8 @@
           }
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
-          <textarea formControlName="descripcion" rows="3"
+          <label for="cat-descripcion" class="block text-xs font-semibold text-gray-600 mb-1">Descripción</label>
+          <textarea id="cat-descripcion" formControlName="descripcion" rows="3"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 resize-none"
             placeholder="Descripción opcional de la categoría"></textarea>
         </div>

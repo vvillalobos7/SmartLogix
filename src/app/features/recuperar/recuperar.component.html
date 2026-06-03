@@ -45,8 +45,8 @@
         <form [formGroup]="validarForm" (ngSubmit)="onValidar()" class="space-y-4">
 
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Correo electrónico</label>
-            <input type="email" formControlName="correo"
+            <label for="recuperar-correo" class="block text-xs font-semibold text-gray-600 mb-1.5">Correo electrónico</label>
+            <input id="recuperar-correo" type="email" formControlName="correo"
               class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
               placeholder="usuario@smartlogix.cl">
             @if (validarForm.get('correo')?.touched && validarForm.get('correo')?.invalid) {
@@ -55,8 +55,8 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">RUT</label>
-            <input type="text" formControlName="rut"
+            <label for="recuperar-rut" class="block text-xs font-semibold text-gray-600 mb-1.5">RUT</label>
+            <input id="recuperar-rut" type="text" formControlName="rut"
               class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
               placeholder="12.345.678-9">
             @if (validarForm.get('rut')?.touched && validarForm.get('rut')?.invalid) {
@@ -96,9 +96,9 @@
         <form [formGroup]="claveForm" (ngSubmit)="onCambiarClave()" class="space-y-4">
 
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nueva contraseña</label>
+            <label for="recuperar-nueva" class="block text-xs font-semibold text-gray-600 mb-1.5">Nueva contraseña</label>
             <div class="relative">
-              <input [type]="showNueva ? 'text' : 'password'" formControlName="nuevaClave"
+              <input id="recuperar-nueva" [type]="showNueva ? 'text' : 'password'" formControlName="nuevaClave"
                 class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-10"
                 placeholder="Mínimo 6 caracteres">
               <button type="button" (click)="showNueva = !showNueva"
@@ -115,9 +115,9 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Confirmar contraseña</label>
+            <label for="recuperar-confirmar" class="block text-xs font-semibold text-gray-600 mb-1.5">Confirmar contraseña</label>
             <div class="relative">
-              <input [type]="showConfirmar ? 'text' : 'password'" formControlName="confirmar"
+              <input id="recuperar-confirmar" [type]="showConfirmar ? 'text' : 'password'" formControlName="confirmar"
                 class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-10"
                 placeholder="Repite tu contraseña">
               <button type="button" (click)="showConfirmar = !showConfirmar"

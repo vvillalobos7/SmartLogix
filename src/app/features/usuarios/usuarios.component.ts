@@ -78,7 +78,7 @@ export class UsuariosComponent implements OnInit {
 
   getAvatarColor(nombre: string): string {
     const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-600', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
-    return colors[nombre.charCodeAt(0) % colors.length];
+    return colors[(nombre.codePointAt(0) ?? 0) % colors.length];
   }
 
   getRolBadge(rolNombre?: string): string {

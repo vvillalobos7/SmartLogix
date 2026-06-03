@@ -63,8 +63,8 @@
       <div class="grid grid-cols-2 gap-3">
         <!-- Región -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Región *</label>
-          <select formControlName="regionId" (change)="onRegionChange()"
+          <label for="perfil-region" class="block text-xs font-semibold text-gray-600 mb-1">Región *</label>
+          <select id="perfil-region" formControlName="regionId" (change)="onRegionChange()"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             <option value="">Seleccionar...</option>
             @for (r of regiones; track r.id) {
@@ -78,8 +78,8 @@
 
         <!-- Comuna -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Comuna *</label>
-          <select formControlName="comunaId"
+          <label for="perfil-comuna" class="block text-xs font-semibold text-gray-600 mb-1">Comuna *</label>
+          <select id="perfil-comuna" formControlName="comunaId"
             [disabled]="comunas.length === 0"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 disabled:opacity-50">
             <option value="">Seleccionar...</option>
@@ -96,8 +96,8 @@
       <div class="grid grid-cols-2 gap-3">
         <!-- Calle -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Calle *</label>
-          <input formControlName="calle" type="text" placeholder="Ej: Av. Providencia"
+          <label for="perfil-calle" class="block text-xs font-semibold text-gray-600 mb-1">Calle *</label>
+          <input id="perfil-calle" formControlName="calle" type="text" placeholder="Ej: Av. Providencia"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           @if (form.get('calle')?.invalid && form.get('calle')?.touched) {
             <p class="text-xs text-red-500 mt-1">Calle requerida.</p>
@@ -106,8 +106,8 @@
 
         <!-- Número -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Número *</label>
-          <input formControlName="numero" type="text" placeholder="Ej: 1234"
+          <label for="perfil-numero" class="block text-xs font-semibold text-gray-600 mb-1">Número *</label>
+          <input id="perfil-numero" formControlName="numero" type="text" placeholder="Ej: 1234"
             class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
           @if (form.get('numero')?.invalid && form.get('numero')?.touched) {
             <p class="text-xs text-red-500 mt-1">Número requerido.</p>
@@ -117,8 +117,8 @@
 
       <!-- Código Postal -->
       <div class="w-1/2">
-        <label class="block text-xs font-semibold text-gray-600 mb-1">Código postal <span class="font-normal text-gray-400">(opcional)</span></label>
-        <input formControlName="codigoPostal" type="text" placeholder="Ej: 7500000"
+        <label for="perfil-codigopostal" class="block text-xs font-semibold text-gray-600 mb-1">Código postal <span class="font-normal text-gray-400">(opcional)</span></label>
+        <input id="perfil-codigopostal" formControlName="codigoPostal" type="text" placeholder="Ej: 7500000"
           class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
       </div>
 

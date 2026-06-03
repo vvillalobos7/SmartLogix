@@ -44,7 +44,7 @@ export class ProductosComponent implements OnInit {
   categoriaForm!: FormGroup;
 
   get paisesList(): string[] {
-    return [...new Set(this.productos.map(p => p.pais ?? 'Chile').filter(Boolean))].sort();
+    return [...new Set(this.productos.map(p => p.pais ?? 'Chile').filter(Boolean))].sort((a, b) => a.localeCompare(b));
   }
 
   get productosFiltrados(): Producto[] {
