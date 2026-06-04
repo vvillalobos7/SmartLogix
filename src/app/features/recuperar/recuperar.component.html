@@ -43,19 +43,27 @@
         <h2 class="text-lg font-semibold text-gray-800 mb-1">Solicitar recuperación</h2>
         <p class="text-sm text-gray-500 mb-5">Ingresa tu correo y un administrador aprobará tu solicitud.</p>
 
-        <form [formGroup]="solicitarForm" (ngSubmit)="onSolicitar()" class="space-y-4">
+        <form [formGroup]="solicitarForm" (ngSubmit)="onSolicitar()" class="space-y-4" novalidate>
           <div>
             <label for="recuperar-correo" class="block text-xs font-semibold text-gray-600 mb-1.5">Correo electrónico</label>
-            <input id="recuperar-correo" type="email" formControlName="correo"
-              class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+            <input id="recuperar-correo" type="email" formControlName="correo" autocomplete="email"
+              class="w-full px-4 py-2.5 text-sm rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
+              [class]="solicitarForm.get('correo')?.touched ? (solicitarForm.get('correo')?.invalid ? 'border-red-400' : 'border-green-400') : 'border-gray-200'"
               placeholder="usuario@smartlogix.cl">
-            @if (solicitarForm.get('correo')?.touched && solicitarForm.get('correo')?.invalid) {
-              <p class="text-xs text-red-500 mt-1">Correo inválido.</p>
+            @if (solicitarForm.get('correo')?.touched && solicitarForm.get('correo')?.hasError('required')) {
+              <p class="text-xs text-red-500 mt-1">El correo es obligatorio.</p>
+            } @else if (solicitarForm.get('correo')?.touched && solicitarForm.get('correo')?.hasError('email')) {
+              <p class="text-xs text-red-500 mt-1">Ingresa un correo electrónico válido.</p>
             }
           </div>
 
           @if (error) {
-            <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2.5">{{ error }}</div>
+            <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2.5 flex items-start gap-2">
+              <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              {{ error }}
+            </div>
           }
 
           <button type="submit" [disabled]="solicitarForm.invalid || loading"
@@ -77,42 +85,44 @@
         </form>
       }
 
-      <!-- PASO 2: Info + cambiar clave -->
+      <!-- PASO 2: Cambiar clave -->
       @if (paso === 2) {
         <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-5">
-          <p class="text-xs font-semibold text-green-800">Solicitud enviada</p>
-          <p class="text-xs text-green-700 mt-0.5">
-            Un administrador revisará tu solicitud para <span class="font-semibold">{{ correoEnviado }}</span>.
-            Una vez aprobada, usa el formulario de abajo para cambiar tu contraseña.
-          </p>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div>
+              <p class="text-xs font-semibold text-green-800">Solicitud enviada</p>
+              <p class="text-xs text-green-700 mt-0.5">
+                Un administrador revisará tu solicitud para <span class="font-semibold">{{ correoEnviado }}</span>.
+                Una vez aprobada, podrás usar el formulario de abajo para cambiar tu contraseña.
+              </p>
+            </div>
+          </div>
         </div>
 
         <h2 class="text-base font-semibold text-gray-800 mb-4">Cambiar contraseña</h2>
 
-        <form [formGroup]="claveForm" (ngSubmit)="onCambiarClave()" class="space-y-4">
+        <form [formGroup]="claveForm" (ngSubmit)="onCambiarClave()" class="space-y-4" novalidate>
 
           <div>
             <label for="cambiar-correo" class="block text-xs font-semibold text-gray-600 mb-1.5">Correo electrónico</label>
-            <input id="cambiar-correo" type="email" formControlName="correo"
-              class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
-          </div>
-
-          <div>
-            <label for="cambiar-rut" class="block text-xs font-semibold text-gray-600 mb-1.5">RUT</label>
-            <input id="cambiar-rut" type="text" formControlName="rut"
-              class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-              placeholder="12.345.678-9">
-            @if (claveForm.get('rut')?.touched && claveForm.get('rut')?.invalid) {
-              <p class="text-xs text-red-500 mt-1">Ingresa un RUT válido (mínimo 7 caracteres).</p>
+            <input id="cambiar-correo" type="email" formControlName="correo" autocomplete="email"
+              class="w-full px-4 py-2.5 text-sm rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
+              [class]="claveForm.get('correo')?.touched ? (claveForm.get('correo')?.invalid ? 'border-red-400' : 'border-green-400') : 'border-gray-200'">
+            @if (claveForm.get('correo')?.touched && claveForm.get('correo')?.invalid) {
+              <p class="text-xs text-red-500 mt-1">Ingresa un correo válido.</p>
             }
           </div>
 
           <div>
             <label for="cambiar-nueva" class="block text-xs font-semibold text-gray-600 mb-1.5">Nueva contraseña</label>
             <div class="relative">
-              <input id="cambiar-nueva" [type]="showNueva ? 'text' : 'password'" formControlName="nuevaClave"
-                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-10"
-                placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 símbolo">
+              <input id="cambiar-nueva" [type]="showNueva ? 'text' : 'password'" formControlName="nuevaClave" autocomplete="new-password"
+                class="w-full px-4 py-2.5 text-sm rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition border pr-10"
+                [class]="claveForm.get('nuevaClave')?.touched ? (claveForm.get('nuevaClave')?.invalid ? 'border-red-400' : 'border-green-400') : 'border-gray-200'"
+                placeholder="Mínimo 8 caracteres">
               <button type="button" (click)="showNueva = !showNueva"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,16 +131,38 @@
                 </svg>
               </button>
             </div>
+            <!-- Barra de fortaleza -->
+            @if (claveForm.get('nuevaClave')?.value) {
+              <div class="mt-2 space-y-1">
+                <div class="flex gap-1">
+                  @for (i of [1,2,3,4]; track i) {
+                    <div class="h-1 flex-1 rounded-full transition-all duration-300"
+                      [class]="i <= passwordStrength ? strengthColor : 'bg-gray-200'"></div>
+                  }
+                </div>
+                <p class="text-xs" [class]="passwordStrength >= 3 ? 'text-green-600' : passwordStrength >= 2 ? 'text-yellow-600' : 'text-red-500'">
+                  Seguridad: {{ strengthLabel }}
+                </p>
+              </div>
+            }
             @if (claveForm.get('nuevaClave')?.touched && claveForm.get('nuevaClave')?.invalid) {
-              <p class="text-xs text-red-500 mt-1">Mínimo 8 caracteres, 1 mayúscula y 1 símbolo.</p>
+              <ul class="text-xs text-red-500 mt-1 space-y-0.5 list-disc list-inside">
+                @if (claveForm.get('nuevaClave')?.hasError('minlength')) {
+                  <li>Mínimo 8 caracteres.</li>
+                }
+                @if (claveForm.get('nuevaClave')?.hasError('pattern')) {
+                  <li>Debe incluir al menos 1 mayúscula y 1 símbolo especial.</li>
+                }
+              </ul>
             }
           </div>
 
           <div>
             <label for="cambiar-confirmar" class="block text-xs font-semibold text-gray-600 mb-1.5">Confirmar contraseña</label>
             <div class="relative">
-              <input id="cambiar-confirmar" [type]="showConfirmar ? 'text' : 'password'" formControlName="confirmar"
-                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-10"
+              <input id="cambiar-confirmar" [type]="showConfirmar ? 'text' : 'password'" formControlName="confirmar" autocomplete="new-password"
+                class="w-full px-4 py-2.5 text-sm rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition border pr-10"
+                [class]="claveForm.get('confirmar')?.touched ? (claveForm.hasError('noCoinciden') ? 'border-red-400' : 'border-green-400') : 'border-gray-200'"
                 placeholder="Repite tu contraseña">
               <button type="button" (click)="showConfirmar = !showConfirmar"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -146,7 +178,12 @@
           </div>
 
           @if (error) {
-            <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2.5">{{ error }}</div>
+            <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2.5 flex items-start gap-2">
+              <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              {{ error }}
+            </div>
           }
 
           <button type="submit" [disabled]="claveForm.invalid || loading"
@@ -174,7 +211,7 @@
             </svg>
           </div>
           <h2 class="text-base font-semibold text-gray-800 mb-2">¡Contraseña actualizada!</h2>
-          <p class="text-sm text-gray-500 mb-6">Tu contraseña fue cambiada exitosamente. Ya puedes iniciar sesión.</p>
+          <p class="text-sm text-gray-500 mb-6">Tu contraseña fue cambiada exitosamente. Ya puedes iniciar sesión con tu nueva clave.</p>
           <a routerLink="/login"
             class="block w-full py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-xl transition-colors text-center">
             Ir al inicio de sesión

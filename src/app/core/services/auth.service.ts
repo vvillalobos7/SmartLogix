@@ -99,7 +99,7 @@ export class AuthService {
   }
 
   getSolicitudesRecuperacion(estado?: string): Observable<SolicitudRecuperacion[]> {
-    const base = `${environment.services.gateway}/preguntas-seguridad/solicitudes`;
+    const base = `/auth/solicitudes-recuperacion`;
     const url = estado ? `${base}?estado=${estado}` : base;
     return this.http.get<SolicitudRecuperacion[]>(url).pipe(
       catchError(() => of([])),
@@ -108,7 +108,7 @@ export class AuthService {
 
   resolverSolicitud(id: string, accion: 'aprobar' | 'rechazar', motivo?: string): Observable<{ mensaje: string }> {
     return this.http.post<{ mensaje: string }>(
-      `${environment.services.gateway}/preguntas-seguridad/resolver/${id}`,
+      `/auth/solicitudes-recuperacion/${id}/resolver`,
       { accion, motivo },
     ).pipe(
       catchError(err => throwError(() => err)),
@@ -164,8 +164,8 @@ export class AuthService {
     );
   }
 
-  cambiarClave(correo: string, rut: string, nuevaClave: string): Observable<{ mensaje: string }> {
-    return this.http.post<{ mensaje: string }>(`${environment.services.auth}/cambiar-clave`, { correo, rut, nuevaClave }).pipe(
+  cambiarClave(correo: string, nuevaClave: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`/auth/cambiar-clave-recuperacion`, { correo, nuevaClave }).pipe(
       catchError(err => throwError(() => err)),
     );
   }

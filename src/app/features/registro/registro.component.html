@@ -20,118 +20,166 @@
     <!-- Card -->
     <div class="bg-white rounded-2xl shadow-2xl px-8 py-8">
 
-        <h2 class="text-lg font-semibold text-gray-800 mb-1">Crear cuenta</h2>
-        <p class="text-sm text-gray-500 mb-5">Completa el formulario para registrarte en la plataforma.</p>
+      <h2 class="text-lg font-semibold text-gray-800 mb-1">Crear cuenta</h2>
+      <p class="text-sm text-gray-500 mb-5">Completa el formulario para registrarte en la plataforma.</p>
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4" novalidate>
 
-          <!-- Nombre y Apellido -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="registro-nombre" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre *</label>
-              <input id="registro-nombre" type="text" formControlName="nombre"
-                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-                placeholder="Juan">
-              @if (form.get('nombre')?.touched && form.get('nombre')?.invalid) {
-                <p class="text-xs text-red-500 mt-1">Mínimo 2 caracteres.</p>
-              }
-            </div>
-            <div>
-              <label for="registro-apellido" class="block text-xs font-semibold text-gray-600 mb-1.5">Apellido *</label>
-              <input id="registro-apellido" type="text" formControlName="apellido"
-                class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-                placeholder="Pérez">
-              @if (form.get('apellido')?.touched && form.get('apellido')?.invalid) {
-                <p class="text-xs text-red-500 mt-1">Mínimo 2 caracteres.</p>
-              }
-            </div>
-          </div>
-
-          <!-- RUT -->
+        <!-- Nombre y Apellido -->
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="registro-rut" class="block text-xs font-semibold text-gray-600 mb-1.5">RUT *</label>
-            <input id="registro-rut" type="text" formControlName="rut"
-              class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-              placeholder="12.345.678-9">
-            @if (form.get('rut')?.touched && form.get('rut')?.invalid) {
+            <label for="registro-nombre" class="block text-xs font-semibold text-gray-600 mb-1.5">Nombre *</label>
+            <input id="registro-nombre" type="text" formControlName="nombre" autocomplete="given-name"
+              class="w-full px-3 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
+              [class]="fieldClass('nombre')"
+              placeholder="Juan">
+            @if (form.get('nombre')?.touched) {
+              @if (form.get('nombre')?.hasError('required')) {
+                <p class="text-xs text-red-500 mt-1">El nombre es obligatorio.</p>
+              } @else if (form.get('nombre')?.hasError('minlength')) {
+                <p class="text-xs text-red-500 mt-1">Mínimo 2 caracteres.</p>
+              }
+            }
+          </div>
+          <div>
+            <label for="registro-apellido" class="block text-xs font-semibold text-gray-600 mb-1.5">Apellido *</label>
+            <input id="registro-apellido" type="text" formControlName="apellido" autocomplete="family-name"
+              class="w-full px-3 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
+              [class]="fieldClass('apellido')"
+              placeholder="Pérez">
+            @if (form.get('apellido')?.touched) {
+              @if (form.get('apellido')?.hasError('required')) {
+                <p class="text-xs text-red-500 mt-1">El apellido es obligatorio.</p>
+              } @else if (form.get('apellido')?.hasError('minlength')) {
+                <p class="text-xs text-red-500 mt-1">Mínimo 2 caracteres.</p>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- RUT -->
+        <div>
+          <label for="registro-rut" class="block text-xs font-semibold text-gray-600 mb-1.5">RUT *</label>
+          <input id="registro-rut" type="text" formControlName="rut" autocomplete="off"
+            class="w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
+            [class]="fieldClass('rut')"
+            placeholder="12.345.678-9">
+          @if (form.get('rut')?.touched) {
+            @if (form.get('rut')?.hasError('required')) {
+              <p class="text-xs text-red-500 mt-1">El RUT es obligatorio.</p>
+            } @else if (form.get('rut')?.hasError('minlength') || form.get('rut')?.hasError('maxlength')) {
               <p class="text-xs text-red-500 mt-1">Ingresa un RUT válido (ej: 12.345.678-9).</p>
             }
-          </div>
-
-          <!-- Correo -->
-          <div>
-            <label for="registro-correo" class="block text-xs font-semibold text-gray-600 mb-1.5">Correo electrónico *</label>
-            <input id="registro-correo" type="email" formControlName="correo"
-              class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-              placeholder="usuario@ejemplo.com">
-            @if (form.get('correo')?.touched && form.get('correo')?.invalid) {
-              <p class="text-xs text-red-500 mt-1">Correo inválido.</p>
-            }
-          </div>
-
-          <!-- Contraseña -->
-          <div>
-            <label for="registro-clave" class="block text-xs font-semibold text-gray-600 mb-1.5">Contraseña *</label>
-            <div class="relative">
-              <input id="registro-clave" [type]="showPassword ? 'text' : 'password'" formControlName="clave"
-                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-10"
-                placeholder="Mínimo 6 caracteres">
-              <button type="button" (click)="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    [attr.d]="showPassword ? 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21' : 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'"/>
-                </svg>
-              </button>
-            </div>
-            @if (form.get('clave')?.touched && form.get('clave')?.invalid) {
-              <p class="text-xs text-red-500 mt-1">Mínimo 6 caracteres.</p>
-            }
-          </div>
-
-          <!-- Confirmar contraseña -->
-          <div>
-            <label for="registro-confirmar" class="block text-xs font-semibold text-gray-600 mb-1.5">Confirmar contraseña *</label>
-            <div class="relative">
-              <input id="registro-confirmar" [type]="showConfirm ? 'text' : 'password'" formControlName="confirmarClave"
-                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-10"
-                placeholder="Repite tu contraseña">
-              <button type="button" (click)="showConfirm = !showConfirm"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    [attr.d]="showConfirm ? 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21' : 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'"/>
-                </svg>
-              </button>
-            </div>
-            @if (form.hasError('noCoinciden') && form.get('confirmarClave')?.touched) {
-              <p class="text-xs text-red-500 mt-1">Las contraseñas no coinciden.</p>
-            }
-          </div>
-
-          @if (error) {
-            <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2.5">{{ error }}</div>
           }
+        </div>
 
-          <button type="submit" [disabled]="form.invalid || loading"
-            class="w-full py-2.5 bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 mt-2">
-            @if (loading) {
-              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
-              Registrando...
-            } @else {
-              Crear cuenta
+        <!-- Correo -->
+        <div>
+          <label for="registro-correo" class="block text-xs font-semibold text-gray-600 mb-1.5">Correo electrónico *</label>
+          <input id="registro-correo" type="email" formControlName="correo" autocomplete="email"
+            class="w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
+            [class]="fieldClass('correo')"
+            placeholder="usuario@ejemplo.com">
+          @if (form.get('correo')?.touched) {
+            @if (form.get('correo')?.hasError('required')) {
+              <p class="text-xs text-red-500 mt-1">El correo es obligatorio.</p>
+            } @else if (form.get('correo')?.hasError('email')) {
+              <p class="text-xs text-red-500 mt-1">Ingresa un correo electrónico válido.</p>
             }
-          </button>
+          }
+        </div>
 
-          <p class="text-center text-xs text-gray-500 mt-2">
-            ¿Ya tienes cuenta?
-            <a routerLink="/login" class="text-green-700 hover:underline font-semibold">Iniciar sesión</a>
-          </p>
+        <!-- Contraseña -->
+        <div>
+          <label for="registro-clave" class="block text-xs font-semibold text-gray-600 mb-1.5">Contraseña *</label>
+          <div class="relative">
+            <input id="registro-clave" [type]="showPassword ? 'text' : 'password'" formControlName="clave" autocomplete="new-password"
+              class="w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition border pr-10"
+              [class]="fieldClass('clave')"
+              placeholder="Mínimo 8 caracteres">
+            <button type="button" (click)="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  [attr.d]="showPassword ? 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21' : 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Barra de fortaleza -->
+          @if (form.get('clave')?.value) {
+            <div class="mt-2 space-y-1">
+              <div class="flex gap-1">
+                @for (i of [1,2,3,4]; track i) {
+                  <div class="h-1 flex-1 rounded-full transition-all duration-300"
+                    [class]="i <= passwordStrength ? strengthColor : 'bg-gray-200'"></div>
+                }
+              </div>
+              <p class="text-xs" [class]="passwordStrength >= 3 ? 'text-green-600' : passwordStrength >= 2 ? 'text-yellow-600' : 'text-red-500'">
+                Seguridad: <span class="font-semibold">{{ strengthLabel }}</span>
+              </p>
+            </div>
+          }
+          @if (form.get('clave')?.touched && form.get('clave')?.invalid) {
+            <ul class="text-xs text-red-500 mt-1 space-y-0.5 list-disc list-inside">
+              @if (form.get('clave')?.hasError('minlength')) {
+                <li>Mínimo 8 caracteres.</li>
+              }
+              @if (form.get('clave')?.hasError('pattern')) {
+                <li>Debe incluir al menos 1 mayúscula y 1 símbolo (ej: !, @, #).</li>
+              }
+            </ul>
+          }
+        </div>
 
-        </form>
+        <!-- Confirmar contraseña -->
+        <div>
+          <label for="registro-confirmar" class="block text-xs font-semibold text-gray-600 mb-1.5">Confirmar contraseña *</label>
+          <div class="relative">
+            <input id="registro-confirmar" [type]="showConfirm ? 'text' : 'password'" formControlName="confirmarClave" autocomplete="new-password"
+              class="w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition border pr-10"
+              [class]="form.get('confirmarClave')?.touched ? (form.hasError('noCoinciden') || form.get('confirmarClave')?.invalid ? 'border-red-400 bg-red-50/30' : 'border-green-400 bg-green-50/30') : 'border-gray-200 bg-gray-50'"
+              placeholder="Repite tu contraseña">
+            <button type="button" (click)="showConfirm = !showConfirm"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  [attr.d]="showConfirm ? 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21' : 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'"/>
+              </svg>
+            </button>
+          </div>
+          @if (form.hasError('noCoinciden') && form.get('confirmarClave')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Las contraseñas no coinciden.</p>
+          }
+        </div>
+
+        @if (error) {
+          <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2.5 flex items-start gap-2">
+            <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            {{ error }}
+          </div>
+        }
+
+        <button type="submit" [disabled]="form.invalid || loading"
+          class="w-full py-2.5 bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 mt-2">
+          @if (loading) {
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Registrando...
+          } @else {
+            Crear cuenta
+          }
+        </button>
+
+        <p class="text-center text-xs text-gray-500 mt-2">
+          ¿Ya tienes cuenta?
+          <a routerLink="/login" class="text-green-700 hover:underline font-semibold">Iniciar sesión</a>
+        </p>
+
+      </form>
 
       <p class="text-center text-xs text-gray-400 mt-6">© 2025 Softyz Logistics Technology</p>
     </div>

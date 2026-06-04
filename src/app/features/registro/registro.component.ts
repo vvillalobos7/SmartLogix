@@ -30,13 +30,41 @@ export class RegistroComponent {
     private readonly cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
-      nombre:         ['', [Validators.required, Validators.minLength(2)]],
-      apellido:       ['', [Validators.required, Validators.minLength(2)]],
+      nombre:         ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      apellido:       ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       rut:            ['', [Validators.required, Validators.minLength(7), Validators.maxLength(12)]],
-      correo:         ['', [Validators.required, Validators.email]],
-      clave:          ['', [Validators.required, Validators.minLength(6)]],
+      correo:         ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+      clave:          ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/),
+      ]],
       confirmarClave: ['', Validators.required],
     }, { validators: passwordMatch });
+  }
+
+  get passwordStrength(): number {
+    const v: string = this.form.get('clave')?.value ?? '';
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(v)) score++;
+    if (v.length >= 12) score++;
+    return score;
+  }
+
+  get strengthLabel(): string {
+    return ['', 'Débil', 'Regular', 'Buena', 'Fuerte'][this.passwordStrength] ?? '';
+  }
+
+  get strengthColor(): string {
+    return ['', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'][this.passwordStrength] ?? '';
+  }
+
+  fieldClass(field: string): string {
+    const c = this.form.get(field);
+    if (!c?.touched) return 'border-gray-200 bg-gray-50';
+    return c.invalid ? 'border-red-400 bg-red-50/30' : 'border-green-400 bg-green-50/30';
   }
 
   onSubmit(): void {

@@ -319,7 +319,8 @@ export interface ActividadReciente {
 export interface SolicitudRecuperacion {
   id: string;
   correo: string;
-  estado: 'pendiente' | 'aprobada' | 'rechazada';
+  nombreUsuario?: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA' | 'COMPLETADA';
   fechaSolicitud?: string;
   motivoRechazo?: string;
 }

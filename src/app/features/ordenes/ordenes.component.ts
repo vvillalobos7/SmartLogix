@@ -52,6 +52,7 @@ export class OrdenesComponent implements OnInit {
   carrito: { producto: Producto; cantidad: number }[] = [];
   procesandoOrden = false;
   direccionId: string | null = null;
+  private nombreCliente = '';
   paisModal = '';
 
   get paisesDisponibles(): string[] {
@@ -225,6 +226,7 @@ export class OrdenesComponent implements OnInit {
       catchError(() => of(null)),
     ).subscribe(user => {
       this.direccionId = user?.direccion?.id ?? null;
+      this.nombreCliente = [user?.nombre, user?.apellido].filter(Boolean).join(' ');
       this.cdr.detectChanges();
     });
     this.productoService.getAll().subscribe(productos => {
@@ -286,7 +288,7 @@ export class OrdenesComponent implements OnInit {
     if (!user) { this.procesandoOrden = false; return; }
     const dto: OrdenRequest = {
       direccionId: this.direccionId,
-      userNombre: user.correo,
+      userNombre: this.nombreCliente || user.correo,
       detalles: this.carrito.map(c => ({
         productoId: c.producto.id,
         cantidad: c.cantidad,

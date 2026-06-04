@@ -42,7 +42,6 @@ export class RecuperarComponent {
 
     this.claveForm = this.fb.group({
       correo:     ['', [Validators.required, Validators.email]],
-      rut:        ['', [Validators.required, Validators.minLength(7), Validators.maxLength(12)]],
       nuevaClave: ['', [
         Validators.required,
         Validators.minLength(8),
@@ -50,6 +49,24 @@ export class RecuperarComponent {
       ]],
       confirmar: ['', Validators.required],
     }, { validators: passwordMatch });
+  }
+
+  get passwordStrength(): number {
+    const v: string = this.claveForm.get('nuevaClave')?.value ?? '';
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(v)) score++;
+    if (v.length >= 12) score++;
+    return score;
+  }
+
+  get strengthLabel(): string {
+    return ['', 'Débil', 'Regular', 'Buena', 'Fuerte'][this.passwordStrength] ?? '';
+  }
+
+  get strengthColor(): string {
+    return ['', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'][this.passwordStrength] ?? '';
   }
 
   onSolicitar(): void {
@@ -77,16 +94,17 @@ export class RecuperarComponent {
     if (this.claveForm.invalid) return;
     this.loading = true;
     this.error = '';
-    const { correo, rut, nuevaClave } = this.claveForm.value as { correo: string; rut: string; nuevaClave: string };
-    this.authService.cambiarClave(correo, rut, nuevaClave).subscribe({
+    const { correo, nuevaClave } = this.claveForm.value as { correo: string; nuevaClave: string };
+    this.authService.cambiarClave(correo, nuevaClave).subscribe({
       next: () => {
         this.loading = false;
         this.paso = 3;
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.error = 'No se pudo cambiar la contraseña. Verifica que tu solicitud haya sido aprobada por un administrador.';
+        const msg: string = err?.error?.error ?? '';
+        this.error = msg || 'No se pudo cambiar la contraseña. Verifica que tu solicitud haya sido aprobada por un administrador.';
         this.cdr.detectChanges();
       },
     });

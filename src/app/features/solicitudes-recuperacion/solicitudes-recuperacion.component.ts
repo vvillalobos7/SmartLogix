@@ -32,19 +32,26 @@ export class SolicitudesRecuperacionComponent implements OnInit {
 
   cargar(): void {
     this.cargando = true;
-    this.authService.getSolicitudesRecuperacion(this.filtroEstado || undefined).subscribe(data => {
-      this.solicitudes = data;
-      this.cargando = false;
-      this.cdr.detectChanges();
+    this.cdr.detectChanges();
+    this.authService.getSolicitudesRecuperacion(this.filtroEstado || undefined).subscribe({
+      next: data => {
+        this.solicitudes = data;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
   aprobar(s: SolicitudRecuperacion): void {
-    if (!confirm(`¿Aprobar la solicitud de recuperación de ${s.correo}?`)) return;
+    if (!confirm(`¿Aprobar la solicitud de recuperación de ${s.nombreUsuario ?? s.correo}?`)) return;
     this.procesando = s.id;
     this.authService.resolverSolicitud(s.id, 'aprobar').subscribe({
       next: () => {
-        this.toast.success('Solicitud aprobada', `Se aprobó la recuperación para ${s.correo}.`);
+        this.toast.success('Solicitud aprobada', `${s.nombreUsuario ?? s.correo} ya puede cambiar su contraseña.`);
         this.procesando = null;
         this.cargar();
       },
@@ -69,7 +76,7 @@ export class SolicitudesRecuperacionComponent implements OnInit {
     this.showRechazarModal = false;
     this.authService.resolverSolicitud(s.id, 'rechazar', this.motivoRechazo || undefined).subscribe({
       next: () => {
-        this.toast.success('Solicitud rechazada', `Se rechazó la solicitud de ${s.correo}.`);
+        this.toast.success('Solicitud rechazada', `Se rechazó la solicitud de ${s.nombreUsuario ?? s.correo}.`);
         this.procesando = null;
         this.solicitudArechazar = null;
         this.cargar();
@@ -84,11 +91,12 @@ export class SolicitudesRecuperacionComponent implements OnInit {
 
   getEstadoBadge(estado: string): string {
     const map: Record<string, string> = {
-      pendiente: 'bg-yellow-100 text-yellow-800',
-      aprobada:  'bg-green-100 text-green-800',
-      rechazada: 'bg-red-100 text-red-800',
+      PENDIENTE:   'bg-yellow-100 text-yellow-800',
+      APROBADA:    'bg-green-100 text-green-800',
+      RECHAZADA:   'bg-red-100 text-red-800',
+      COMPLETADA:  'bg-blue-100 text-blue-800',
     };
-    return map[estado] ?? 'bg-gray-100 text-gray-600';
+    return map[estado?.toUpperCase()] ?? 'bg-gray-100 text-gray-600';
   }
 
   formatDate(iso?: string): string {
