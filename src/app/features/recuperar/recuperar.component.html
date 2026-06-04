@@ -41,7 +41,7 @@
       <!-- PASO 1: Solicitar recuperación (correo + RUT) -->
       @if (paso === 1) {
         <h2 class="text-lg font-semibold text-gray-800 mb-1">Solicitar recuperación</h2>
-        <p class="text-sm text-gray-500 mb-5">Ingresa tu correo y RUT. Un administrador aprobará tu solicitud.</p>
+        <p class="text-sm text-gray-500 mb-5">Ingresa tu correo y un administrador aprobará tu solicitud.</p>
 
         <form [formGroup]="solicitarForm" (ngSubmit)="onSolicitar()" class="space-y-4" novalidate>
           <div>
@@ -54,17 +54,6 @@
               <p class="text-xs text-red-500 mt-1">El correo es obligatorio.</p>
             } @else if (solicitarForm.get('correo')?.touched && solicitarForm.get('correo')?.hasError('email')) {
               <p class="text-xs text-red-500 mt-1">Ingresa un correo electrónico válido.</p>
-            }
-          </div>
-
-          <div>
-            <label for="recuperar-rut" class="block text-xs font-semibold text-gray-600 mb-1.5">RUT</label>
-            <input id="recuperar-rut" type="text" formControlName="rut" autocomplete="off"
-              class="w-full px-4 py-2.5 text-sm rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 transition border"
-              [class]="solicitarForm.get('rut')?.touched ? (solicitarForm.get('rut')?.invalid ? 'border-red-400' : 'border-green-400') : 'border-gray-200'"
-              placeholder="12.345.678-9">
-            @if (solicitarForm.get('rut')?.touched && solicitarForm.get('rut')?.invalid) {
-              <p class="text-xs text-red-500 mt-1">Ingresa tu RUT (ej: 12.345.678-9).</p>
             }
           </div>
 

@@ -396,33 +396,38 @@ describe('AuthService', () => {
   });
 
   describe('cambiarClave', () => {
-    it('should send password change request', () => {
+    it('should send password change request to recovery endpoint', () => {
       const mockResult = { mensaje: 'Contraseña actualizada' };
-      service.cambiarClave('admin@smartlogix.cl', '11111111-1', 'newpassword').subscribe((res) => {
+      service.cambiarClave('admin@smartlogix.cl', 'newpassword').subscribe((res) => {
         expect(res.mensaje).toBeDefined();
       });
 
-      const req = httpTestingController.expectOne('/auth/cambiar-clave');
+      const req = httpTestingController.expectOne('/auth/cambiar-clave-recuperacion');
       expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ correo: 'admin@smartlogix.cl', nuevaClave: 'newpassword' });
       req.flush(mockResult);
     });
 
-    it('should return error message on password change failure', () => {
-      service.cambiarClave('admin@smartlogix.cl', '11111111-1', 'newpassword').subscribe((res) => {
-        expect(res.mensaje).toContain('No se pudo actualizar');
+    it('should propagate error on password change failure', () => {
+      let hasError = false;
+      service.cambiarClave('admin@smartlogix.cl', 'newpassword').subscribe({
+        error: () => { hasError = true; },
       });
 
-      const req = httpTestingController.expectOne('/auth/cambiar-clave');
+      const req = httpTestingController.expectOne('/auth/cambiar-clave-recuperacion');
       req.flush('Error', { status: 500, statusText: 'Server Error' });
+      expect(hasError).toBe(true);
     });
 
-    it('should handle 400 Bad Request on password change', () => {
-      service.cambiarClave('admin@smartlogix.cl', 'invalid-rut', 'newpass').subscribe((res) => {
-        expect(res.mensaje).toContain('No se pudo actualizar');
+    it('should propagate 400 Bad Request on password change', () => {
+      let hasError = false;
+      service.cambiarClave('admin@smartlogix.cl', 'newpass').subscribe({
+        error: () => { hasError = true; },
       });
 
-      const req = httpTestingController.expectOne('/auth/cambiar-clave');
+      const req = httpTestingController.expectOne('/auth/cambiar-clave-recuperacion');
       req.flush('Bad Request', { status: 400, statusText: 'Bad Request' });
+      expect(hasError).toBe(true);
     });
   });
 
