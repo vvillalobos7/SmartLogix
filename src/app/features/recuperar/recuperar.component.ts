@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule, FormBuilder, FormGroup, Validators,
@@ -34,6 +34,7 @@ export class RecuperarComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.solicitarForm = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
@@ -62,10 +63,12 @@ export class RecuperarComponent {
         this.claveForm.patchValue({ correo });
         this.loading = false;
         this.paso = 2;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
         this.error = 'No se pudo enviar la solicitud. Verifica tu correo e intenta nuevamente.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -79,10 +82,12 @@ export class RecuperarComponent {
       next: () => {
         this.loading = false;
         this.paso = 3;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
         this.error = 'No se pudo cambiar la contraseña. Verifica que tu solicitud haya sido aprobada por un administrador.';
+        this.cdr.detectChanges();
       },
     });
   }
