@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import {
+  ReactiveFormsModule, FormBuilder, FormGroup, Validators,
+  AbstractControl, ValidationErrors,
+} from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 function passwordMatch(control: AbstractControl): ValidationErrors | null {
@@ -18,10 +21,9 @@ function passwordMatch(control: AbstractControl): ValidationErrors | null {
 })
 export class RecuperarComponent {
   paso: 1 | 2 | 3 = 1;
-  correoValidado = '';
-  rutValidado = '';
+  correoEnviado = '';
 
-  validarForm: FormGroup;
+  solicitarForm: FormGroup;
   claveForm: FormGroup;
 
   loading = false;
@@ -30,40 +32,40 @@ export class RecuperarComponent {
   showConfirmar = false;
 
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
+    private readonly fb: FormBuilder,
+    private readonly authService: AuthService,
   ) {
-    this.validarForm = this.fb.group({
+    this.solicitarForm = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
-      rut:    ['', [Validators.required, Validators.minLength(7), Validators.maxLength(12)]],
     });
 
     this.claveForm = this.fb.group({
-      nuevaClave: ['', [Validators.required, Validators.minLength(6)]],
-      confirmar:  ['', Validators.required],
+      correo:     ['', [Validators.required, Validators.email]],
+      rut:        ['', [Validators.required, Validators.minLength(7), Validators.maxLength(12)]],
+      nuevaClave: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/),
+      ]],
+      confirmar: ['', Validators.required],
     }, { validators: passwordMatch });
   }
 
-  onValidar(): void {
-    if (this.validarForm.invalid) return;
+  onSolicitar(): void {
+    if (this.solicitarForm.invalid) return;
     this.loading = true;
     this.error = '';
-    const { correo, rut } = this.validarForm.value;
-    this.authService.validarIdentidad(correo, rut).subscribe({
-      next: (res) => {
+    const correo = this.solicitarForm.value.correo as string;
+    this.authService.solicitarRecuperacion(correo).subscribe({
+      next: () => {
+        this.correoEnviado = correo;
+        this.claveForm.patchValue({ correo });
         this.loading = false;
-        if (res.valido) {
-          this.correoValidado = correo;
-          this.rutValidado = rut;
-          this.paso = 2;
-        } else {
-          this.error = 'No se encontró una cuenta con ese correo y RUT. Verifica los datos.';
-        }
+        this.paso = 2;
       },
       error: () => {
         this.loading = false;
-        this.error = 'Error al conectar con el servidor. Intenta nuevamente.';
+        this.error = 'No se pudo enviar la solicitud. Verifica tu correo e intenta nuevamente.';
       },
     });
   }
@@ -72,14 +74,15 @@ export class RecuperarComponent {
     if (this.claveForm.invalid) return;
     this.loading = true;
     this.error = '';
-    this.authService.cambiarClave(this.correoValidado, this.rutValidado, this.claveForm.value.nuevaClave).subscribe({
+    const { correo, rut, nuevaClave } = this.claveForm.value as { correo: string; rut: string; nuevaClave: string };
+    this.authService.cambiarClave(correo, rut, nuevaClave).subscribe({
       next: () => {
         this.loading = false;
         this.paso = 3;
       },
       error: () => {
         this.loading = false;
-        this.error = 'No se pudo actualizar la contraseña. Intenta nuevamente.';
+        this.error = 'No se pudo cambiar la contraseña. Verifica que tu solicitud haya sido aprobada por un administrador.';
       },
     });
   }

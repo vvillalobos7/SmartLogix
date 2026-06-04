@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, tap, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Orden, OrdenRequest, HistorialEntry, HistorialRequest } from '../../shared/models/models';
+import { Orden, OrdenRequest, HistorialEntry, HistorialRequest, ResumenEmpleado } from '../../shared/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class OrdenService {
@@ -105,6 +105,22 @@ export class OrdenService {
         this.ordenesSubject.next(this.ordenesSubject.value.map(o => o.id === id ? normalized : o));
       }),
       catchError(err => throwError(() => err)),
+    );
+  }
+
+  solicitarDevolucion(ordenId: number, motivo: string): Observable<Orden> {
+    return this.http.post<Orden>(`${this.baseUrl}/${ordenId}/solicitar-devolucion`, { motivo }).pipe(
+      tap(updated => {
+        const normalized = this.normalizeOrden(updated);
+        this.ordenesSubject.next(this.ordenesSubject.value.map(o => o.id === ordenId ? normalized : o));
+      }),
+      catchError(err => throwError(() => err)),
+    );
+  }
+
+  getResumenEmpleados(): Observable<ResumenEmpleado[]> {
+    return this.http.get<ResumenEmpleado[]>(`${this.baseUrl}/resumen-empleados`).pipe(
+      catchError(() => of([])),
     );
   }
 

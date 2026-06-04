@@ -1,5 +1,75 @@
 <div class="space-y-5">
 
+  <!-- Tabs (solo admin) -->
+  @if (esAdmin) {
+    <div class="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+      <button (click)="setTab('envios')"
+        class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+        [class]="tabActiva === 'envios' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+        Envíos
+      </button>
+      <button (click)="setTab('resumen')"
+        class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+        [class]="tabActiva === 'resumen' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+        Resumen empleados
+      </button>
+    </div>
+  }
+
+  <!-- Tab: Resumen empleados -->
+  @if (esAdmin && tabActiva === 'resumen') {
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-700">Resumen por Transportista</h2>
+        <button (click)="cargarResumen()"
+          class="text-xs text-indigo-600 hover:underline font-semibold">Actualizar</button>
+      </div>
+      @if (cargandoResumen) {
+        <div class="flex items-center justify-center py-10 text-gray-400 text-sm gap-2">
+          <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Cargando...
+        </div>
+      } @else if (resumenEmpleados.length === 0) {
+        <div class="text-center py-10 text-sm text-gray-400">Sin datos de empleados.</div>
+      } @else {
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-100 bg-gray-50/50">
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Transportista</th>
+              <th class="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">En tránsito</th>
+              <th class="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Entregadas</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Última actividad</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of resumenEmpleados; track r.transportistaId) {
+              <tr class="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+                <td class="px-5 py-3 font-medium text-gray-800">{{ r.transportistaNombre }}</td>
+                <td class="px-5 py-3 text-center">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-50 text-cyan-700 text-xs font-bold">
+                    {{ r.totalEnTransito }}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-center">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-50 text-green-700 text-xs font-bold">
+                    {{ r.totalEntregadas }}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-xs text-gray-400">{{ formatDate(r.ultimaActividad) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+  <!-- Tab: Envíos (siempre visible para no-admin, visible cuando tab=envios para admin) -->
+  @if (!esAdmin || tabActiva === 'envios') {
+
   <!-- KPIs -->
   <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
     <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center gap-4">
@@ -198,6 +268,8 @@
       </div>
     </div>
   }
+
+  } <!-- /envios tab -->
 
 </div>
 

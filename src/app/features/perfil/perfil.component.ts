@@ -1,15 +1,16 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Usuario, Region, Comuna } from '../../shared/models/models';
+import { Usuario, Region, Comuna, PreguntaSeguridad } from '../../shared/models/models';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './perfil.component.html',
 })
 export class PerfilComponent implements OnInit {
@@ -20,14 +21,29 @@ export class PerfilComponent implements OnInit {
   guardando = false;
   guardadoExitoso = false;
 
+  // Preguntas de seguridad
+  catalogoPreguntas: string[] = [];
+  preguntasSeleccionadas: PreguntaSeguridad[] = [
+    { pregunta: '', respuesta: '' },
+    { pregunta: '', respuesta: '' },
+    { pregunta: '', respuesta: '' },
+  ];
+  guardandoPreguntas = false;
+  preguntasGuardadas = false;
+
   constructor(
     private readonly http: HttpClient,
     private readonly fb: FormBuilder,
     private readonly cdr: ChangeDetectorRef,
+    private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     this.initForm();
+    this.authService.getCatalogoPreguntasSeguridad().pipe(
+      catchError(() => of([])),
+    ).subscribe(c => { this.catalogoPreguntas = c; this.cdr.detectChanges(); });
+
     this.http.get<Region[]>(environment.services.regiones).pipe(
       catchError(() => of([])),
     ).subscribe(r => { this.regiones = r; this.cdr.detectChanges(); });
@@ -108,6 +124,25 @@ export class PerfilComponent implements OnInit {
     if (!d) return '—';
     const partes = [d.calle, d.numero ? `N°${d.numero}` : null, d.comuna?.nombre, d.comuna?.region?.nombre].filter(Boolean);
     return partes.join(', ');
+  }
+
+  preguntasValidas(): boolean {
+    return this.preguntasSeleccionadas.every(p => p.pregunta && p.respuesta.trim().length > 0);
+  }
+
+  guardarPreguntas(): void {
+    if (!this.preguntasValidas() || this.guardandoPreguntas) return;
+    this.guardandoPreguntas = true;
+    this.authService.guardarPreguntasSeguridad(this.preguntasSeleccionadas).pipe(
+      catchError(() => of(null)),
+    ).subscribe(res => {
+      this.guardandoPreguntas = false;
+      if (res) {
+        this.preguntasGuardadas = true;
+        setTimeout(() => { this.preguntasGuardadas = false; this.cdr.detectChanges(); }, 4000);
+      }
+      this.cdr.detectChanges();
+    });
   }
 
   getIniciales(u: Usuario | null): string {

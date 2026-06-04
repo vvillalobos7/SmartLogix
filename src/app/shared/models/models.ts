@@ -19,6 +19,17 @@ export interface LoginResponse {
   rolNombre: RolNombre;
 }
 
+export interface ChallengeResponse {
+  status: 'CHALLENGE';
+  challengeToken: string;
+  pregunta: string;
+}
+
+export interface PreguntaSeguridad {
+  pregunta: string;
+  respuesta: string;
+}
+
 export interface UsuarioSesion {
   userId: string;
   correo: string;
@@ -169,6 +180,9 @@ export interface EstPasi {
   posicion?: string;
   numeroFila?: number;
   ocupacionPct?: number;
+  porcentajeUso?: number;
+  stockActual?: number;
+  capacidadTotal?: number;
   habilitada?: boolean;
   observaciones?: string;
   fechaAsignacion?: string;
@@ -298,6 +312,26 @@ export interface ActividadReciente {
   modulo: string;
   tiempo: string;
   tipo: 'pedido' | 'inventario' | 'envio' | 'usuario' | 'sistema';
+}
+
+// --- RECUPERACIÓN DE CONTRASEÑA ---
+
+export interface SolicitudRecuperacion {
+  id: string;
+  correo: string;
+  estado: 'pendiente' | 'aprobada' | 'rechazada';
+  fechaSolicitud?: string;
+  motivoRechazo?: string;
+}
+
+// --- RESUMEN EMPLEADOS ---
+
+export interface ResumenEmpleado {
+  transportistaId: string;
+  transportistaNombre: string;
+  totalEntregadas: number;
+  totalEnTransito: number;
+  ultimaActividad?: string;
 }
 
 // --- API Response Wrapper ---

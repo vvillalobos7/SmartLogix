@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { OrdenService } from '../ordenes/orden.service';
 import { EstadoOrdenService } from '../ordenes/estado.service';
-import { Orden, HistorialRequest, Estado } from '../../shared/models/models';
+import { Orden, HistorialRequest, Estado, ResumenEmpleado } from '../../shared/models/models';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 
@@ -22,6 +22,10 @@ export class EnviosComponent implements OnInit {
   ordenSeleccionada: Orden | null = null;
   estadoForm!: FormGroup;
   guardando = false;
+
+  tabActiva: 'envios' | 'resumen' = 'envios';
+  resumenEmpleados: ResumenEmpleado[] = [];
+  cargandoResumen = false;
 
   private readonly estadosEnvioNombres = ['En tránsito', 'Entregado', 'Cancelado'];
 
@@ -74,6 +78,22 @@ export class EnviosComponent implements OnInit {
   }
 
   setFiltro(f: typeof this.filtroActivo): void { this.filtroActivo = f; }
+
+  setTab(tab: 'envios' | 'resumen'): void {
+    this.tabActiva = tab;
+    if (tab === 'resumen' && this.resumenEmpleados.length === 0) {
+      this.cargarResumen();
+    }
+  }
+
+  cargarResumen(): void {
+    this.cargandoResumen = true;
+    this.ordenService.getResumenEmpleados().subscribe(data => {
+      this.resumenEmpleados = data;
+      this.cargandoResumen = false;
+      this.cdr.detectChanges();
+    });
+  }
 
   abrirModal(o: Orden): void {
     this.ordenSeleccionada = o;

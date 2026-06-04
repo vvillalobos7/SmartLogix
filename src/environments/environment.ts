@@ -3,6 +3,7 @@ export const environment = {
   apiGateway: '',
   services: {
     auth:        '/auth',
+    gateway:     '',
     registro:    '/auth/register',
     recuperar:   '/auth/recuperar-clave',
     usuarios:    '/api/users',

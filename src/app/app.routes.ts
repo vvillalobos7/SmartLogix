@@ -48,6 +48,12 @@ export const routes: Routes = [
         canActivate: [roleGuard],
       },
       {
+        path: 'solicitudes-recuperacion',
+        loadComponent: () => import('./features/solicitudes-recuperacion/solicitudes-recuperacion.component').then(m => m.SolicitudesRecuperacionComponent),
+        data: { roles: ['admin'] },
+        canActivate: [roleGuard],
+      },
+      {
         path: 'perfil',
         loadComponent: () => import('./features/perfil/perfil.component').then(m => m.PerfilComponent),
         data: { roles: ['cliente'] },

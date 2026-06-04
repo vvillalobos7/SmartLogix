@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, catchError, tap, throwError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, LoginResponse, UsuarioSesion } from '../../shared/models/models';
+import { LoginRequest, LoginResponse, ChallengeResponse, PreguntaSeguridad, UsuarioSesion, SolicitudRecuperacion } from '../../shared/models/models';
 import { ToastService } from './toast.service';
 
 @Injectable({ providedIn: 'root' })
@@ -37,15 +37,14 @@ export class AuthService {
     this.isLoggedIn.set(!!this.getToken());
   }
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.services.auth}/login`, credentials).pipe(
+  login(credentials: LoginRequest): Observable<LoginResponse | ChallengeResponse> {
+    return this.http.post<LoginResponse | ChallengeResponse>(`${environment.services.auth}/login`, credentials).pipe(
       tap(response => {
-        this.storeToken(response.token);
-        const session: UsuarioSesion = {
-          userId: String(response.userId),
-          correo: response.correo,
-          rolNombre: response.rolNombre,
-        };
+        // Si el backend pidió 2FA, NO guardamos sesión todavía
+        if ((response as ChallengeResponse).status === 'CHALLENGE') return;
+        const r = response as LoginResponse;
+        this.storeToken(r.token);
+        const session: UsuarioSesion = { userId: String(r.userId), correo: r.correo, rolNombre: r.rolNombre };
         this.storeUser(session);
         this.currentUserSubject.next(session);
         this.isLoggedIn.set(true);
@@ -70,6 +69,49 @@ export class AuthService {
         }
         return throwError(() => err);
       }),
+    );
+  }
+
+  verificarPregunta(challengeToken: string, respuesta: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${environment.services.auth}/verificar-pregunta`, { challengeToken, respuesta }).pipe(
+      tap(response => {
+        this.storeToken(response.token);
+        const session: UsuarioSesion = { userId: String(response.userId), correo: response.correo, rolNombre: response.rolNombre };
+        this.storeUser(session);
+        this.currentUserSubject.next(session);
+        this.isLoggedIn.set(true);
+      }),
+    );
+  }
+
+  getCatalogoPreguntasSeguridad(): Observable<string[]> {
+    return this.http.get<string[]>(`${environment.services.gateway}/preguntas-seguridad/catalogo`);
+  }
+
+  guardarPreguntasSeguridad(preguntas: PreguntaSeguridad[]): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${environment.services.gateway}/preguntas-seguridad`, preguntas);
+  }
+
+  solicitarRecuperacion(correo: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${environment.services.auth}/solicitar-recuperacion`, { correo }).pipe(
+      catchError(err => throwError(() => err)),
+    );
+  }
+
+  getSolicitudesRecuperacion(estado?: string): Observable<SolicitudRecuperacion[]> {
+    const base = `${environment.services.gateway}/preguntas-seguridad/solicitudes`;
+    const url = estado ? `${base}?estado=${estado}` : base;
+    return this.http.get<SolicitudRecuperacion[]>(url).pipe(
+      catchError(() => of([])),
+    );
+  }
+
+  resolverSolicitud(id: string, accion: 'aprobar' | 'rechazar', motivo?: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(
+      `${environment.services.gateway}/preguntas-seguridad/resolver/${id}`,
+      { accion, motivo },
+    ).pipe(
+      catchError(err => throwError(() => err)),
     );
   }
 
@@ -123,8 +165,8 @@ export class AuthService {
   }
 
   cambiarClave(correo: string, rut: string, nuevaClave: string): Observable<{ mensaje: string }> {
-    return this.http.post<{ mensaje: string }>('/auth/cambiar-clave', { correo, rut, nuevaClave }).pipe(
-      catchError(() => of({ mensaje: 'No se pudo actualizar la contraseña. Intenta nuevamente.' })),
+    return this.http.post<{ mensaje: string }>(`${environment.services.auth}/cambiar-clave`, { correo, rut, nuevaClave }).pipe(
+      catchError(err => throwError(() => err)),
     );
   }
 

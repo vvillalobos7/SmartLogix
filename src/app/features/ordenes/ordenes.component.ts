@@ -195,6 +195,26 @@ export class OrdenesComponent implements OnInit {
     return !(o.historial ?? []).some(h => h.comentario === 'Entrega confirmada por el cliente');
   }
 
+  puedeDevolver(o: Orden): boolean {
+    if (!this.esCliente) return false;
+    if (o.estadoActual !== 'Entregado') return false;
+    return !(o.historial ?? []).some(h => h.estadoNombre === 'Devolución solicitada');
+  }
+
+  solicitarDevolucion(o: Orden): void {
+    const motivo = prompt('Describe el motivo de la devolución (producto en mal estado, incorrecto, etc.):');
+    if (!motivo || motivo.trim() === '') return;
+    this.ordenService.solicitarDevolucion(o.id, motivo.trim()).subscribe({
+      next: () => {
+        this.toast.success('Devolución solicitada', `Se ha registrado la solicitud de devolución para el pedido #${o.id}.`);
+        this.ordenService.getMisOrdenes().subscribe();
+      },
+      error: () => {
+        this.toast.error('Error', 'No se pudo procesar la solicitud de devolución. Intenta nuevamente.');
+      },
+    });
+  }
+
   // â”€â”€ Nuevo Pedido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   abrirNuevoPedido(): void {
