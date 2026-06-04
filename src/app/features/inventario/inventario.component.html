@@ -181,9 +181,9 @@
                           @if (ep.posicion) {
                             <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ ep.posicion }}</span>
                           }
-                          @if (ep.ocupacionPct != null) {
-                            <span class="text-xs font-semibold" [class]="getOcupacionColor(ep.ocupacionPct)">
-                              {{ ep.ocupacionPct }}%
+                          @if (getOcupacion(ep) != null) {
+                            <span class="text-xs font-semibold" [class]="getOcupacionColor(getOcupacion(ep)!)">
+                              {{ getOcupacion(ep) }}%
                             </span>
                           }
                           @if (ep.habilitada === false) {

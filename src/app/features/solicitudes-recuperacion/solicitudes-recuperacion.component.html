@@ -18,11 +18,11 @@
       <div class="flex items-center gap-3">
         <select [(ngModel)]="filtroEstado" (change)="cargar()"
           class="text-xs bg-white/20 border border-white/30 text-white rounded-lg px-3 py-1.5 focus:outline-none">
-          <option value="">Todos</option>
-          <option value="PENDIENTE">Pendientes</option>
-          <option value="APROBADA">Aprobadas</option>
-          <option value="RECHAZADA">Rechazadas</option>
-          <option value="COMPLETADA">Completadas</option>
+          <option value="" style="color:#1f2937;background:#fff">Todos</option>
+          <option value="PENDIENTE" style="color:#1f2937;background:#fff">Pendientes</option>
+          <option value="APROBADA" style="color:#1f2937;background:#fff">Aprobadas</option>
+          <option value="RECHAZADA" style="color:#1f2937;background:#fff">Rechazadas</option>
+          <option value="COMPLETADA" style="color:#1f2937;background:#fff">Completadas</option>
         </select>
         <button (click)="cargar()"
           class="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded-xl transition-colors border border-white/20">

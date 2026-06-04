@@ -21,7 +21,8 @@ function passwordMatch(control: AbstractControl): ValidationErrors | null {
 })
 export class RecuperarComponent {
   paso: 1 | 2 | 3 = 1;
-  correoEnviado = '';
+  correoValidado = '';
+  rutValidado = '';
 
   solicitarForm: FormGroup;
   claveForm: FormGroup;
@@ -38,10 +39,10 @@ export class RecuperarComponent {
   ) {
     this.solicitarForm = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
+      rut:    ['', [Validators.required, Validators.minLength(7), Validators.maxLength(12)]],
     });
 
     this.claveForm = this.fb.group({
-      correo:     ['', [Validators.required, Validators.email]],
       nuevaClave: ['', [
         Validators.required,
         Validators.minLength(8),
@@ -74,10 +75,11 @@ export class RecuperarComponent {
     this.loading = true;
     this.error = '';
     const correo = this.solicitarForm.value.correo as string;
+    const rut    = this.solicitarForm.value.rut as string;
     this.authService.solicitarRecuperacion(correo).subscribe({
       next: () => {
-        this.correoEnviado = correo;
-        this.claveForm.patchValue({ correo });
+        this.correoValidado = correo;
+        this.rutValidado    = rut;
         this.loading = false;
         this.paso = 2;
         this.cdr.detectChanges();
@@ -94,8 +96,8 @@ export class RecuperarComponent {
     if (this.claveForm.invalid) return;
     this.loading = true;
     this.error = '';
-    const { correo, nuevaClave } = this.claveForm.value as { correo: string; nuevaClave: string };
-    this.authService.cambiarClave(correo, nuevaClave).subscribe({
+    const { nuevaClave } = this.claveForm.value as { nuevaClave: string };
+    this.authService.cambiarClave(this.correoValidado, this.rutValidado, nuevaClave).subscribe({
       next: () => {
         this.loading = false;
         this.paso = 3;

@@ -185,6 +185,15 @@ export class InventarioComponent implements OnInit {
     return this.estPasiList.filter(ep => ep.idPasillo === idPasillo);
   }
 
+  getOcupacion(ep: EstPasi): number | null {
+    if (ep.porcentajeUso != null) return Math.round(ep.porcentajeUso);
+    if (ep.stockActual != null && ep.capacidadTotal != null && ep.capacidadTotal > 0) {
+      return Math.round((ep.stockActual / ep.capacidadTotal) * 100);
+    }
+    if (ep.ocupacionPct != null) return ep.ocupacionPct;
+    return null;
+  }
+
   getOcupacionColor(pct?: number): string {
     if (pct == null) return 'text-gray-400';
     if (pct >= 80)   return 'text-red-600';

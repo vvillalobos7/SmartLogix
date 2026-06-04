@@ -164,8 +164,8 @@ export class AuthService {
     );
   }
 
-  cambiarClave(correo: string, nuevaClave: string): Observable<{ mensaje: string }> {
-    return this.http.post<{ mensaje: string }>(`/auth/cambiar-clave-recuperacion`, { correo, nuevaClave }).pipe(
+  cambiarClave(correo: string, rut: string, nuevaClave: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`/auth/cambiar-clave-recuperacion`, { correo, rut, nuevaClave }).pipe(
       catchError(err => throwError(() => err)),
     );
   }
